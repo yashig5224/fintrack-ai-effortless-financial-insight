@@ -23,8 +23,8 @@ interface Insight {
 
 // ─── AI Responses ───
 const aiResponses: Record<string, { text: string; insights: Insight[] }> = {
-  "Analyze my spending": {
-    text: "📊 I've analyzed your spending for the past 30 days. Here's what stands out — your dining expenses are significantly above your set budget, but your transport costs dropped nicely this month. Let's dig in:",
+  "Analyze Spending": {
+    text: "📊 I've scanned your spending for the past 30 days. Your dining expenses are above budget, but transport costs dropped nicely!",
     insights: [
       { label: "Total Spent", value: "₹27,940", change: "-5.2% vs last month", positive: true },
       { label: "Dining Out", value: "₹4,800", change: "22% above budget", positive: false, chartData: [{ name: "Budget", value: 4000 }, { name: "Spent", value: 4800 }] },
@@ -32,8 +32,8 @@ const aiResponses: Record<string, { text: string; insights: Insight[] }> = {
       { label: "Subscriptions", value: "3 active", change: "₹1,847/mo total" },
     ],
   },
-  "Create budget": {
-    text: "🎯 Based on your income of ₹55,000 and spending patterns, here's a personalized budget I'd recommend. I've optimized it using the 50/30/20 rule adapted to your lifestyle:",
+  "Create Budget": {
+    text: "🎯 Based on your ₹55,000 income and spending patterns, here's an optimized 50/30/20 budget:",
     insights: [
       { label: "Needs (50%)", value: "₹27,500", change: "Rent, Bills, Groceries" },
       { label: "Wants (30%)", value: "₹16,500", change: "Dining, Shopping, Fun" },
@@ -41,17 +41,17 @@ const aiResponses: Record<string, { text: string; insights: Insight[] }> = {
       { label: "Projected Savings", value: "₹1,32,000/yr", change: "+23% vs current", positive: true },
     ],
   },
-  "Find savings tips": {
-    text: "💡 I found 5 ways you could save more this month. Some quick wins and some bigger moves — here are the top ones:",
+  "Save More": {
+    text: "💡 Found 5 ways to save more this month. Some quick wins:",
     insights: [
-      { label: "Cancel Unused Sub", value: "Save ₹499/mo", change: "Spotify Premium unused 3 weeks", positive: true },
-      { label: "Meal Prep Sundays", value: "Save ₹2,400/mo", change: "Reduce dining by 50%", positive: true },
+      { label: "Cancel Unused Sub", value: "Save ₹499/mo", change: "Spotify unused 3 weeks", positive: true },
+      { label: "Meal Prep", value: "Save ₹2,400/mo", change: "Reduce dining 50%", positive: true },
       { label: "Switch Insurance", value: "Save ₹3,600/yr", change: "Better plan available", positive: true },
       { label: "Total Potential", value: "₹6,499/mo", change: "₹77,988 per year!", positive: true },
     ],
   },
-  "Show monthly report": {
-    text: "📈 Here's your complete financial report for this month. Overall, you're trending in the right direction — income is up and expenses are down. Keep it going!",
+  "Monthly Report": {
+    text: "📈 Complete financial report: income is up and expenses are down. Keep it going!",
     insights: [
       { label: "Net Income", value: "+₹27,060", change: "+23% vs Feb", positive: true },
       { label: "Top Category", value: "Food ₹8,240", change: "29.5% of spending", chartData: [{ name: "Food", value: 8240 }, { name: "Transport", value: 4500 }, { name: "Shopping", value: 6200 }, { name: "Bills", value: 5800 }, { name: "Fun", value: 3200 }] },
@@ -59,8 +59,8 @@ const aiResponses: Record<string, { text: string; insights: Insight[] }> = {
       { label: "Goal Progress", value: "65%", change: "Emergency Fund on track", positive: true },
     ],
   },
-  "Track goals": {
-    text: "🎯 You have 3 active savings goals. Your Emergency Fund is looking great — you'll hit it by August! The vacation fund needs a small boost though:",
+  "Goals Plan": {
+    text: "🎯 3 active savings goals. Emergency Fund is looking great — you'll hit it by August!",
     insights: [
       { label: "Emergency Fund", value: "68%", change: "₹1,36,000 / ₹2,00,000", positive: true, chartData: [{ name: "Saved", value: 68 }, { name: "Left", value: 32 }] },
       { label: "Vacation Fund", value: "56%", change: "₹45,000 / ₹80,000" },
@@ -71,11 +71,11 @@ const aiResponses: Record<string, { text: string; insights: Insight[] }> = {
 };
 
 const quickActions = [
-  "Analyze my spending",
-  "Create budget",
-  "Find savings tips",
-  "Show monthly report",
-  "Track goals",
+  { label: "Analyze Spending", icon: "⚡", color: "hsl(38,92%,50%)" },
+  { label: "Create Budget", icon: "🛡️", color: "hsl(217,91%,60%)" },
+  { label: "Save More", icon: "💎", color: "hsl(152,69%,41%)" },
+  { label: "Monthly Report", icon: "📊", color: "hsl(262,83%,58%)" },
+  { label: "Goals Plan", icon: "🎯", color: "hsl(330,81%,60%)" },
 ];
 
 const CHART_COLORS = [
@@ -86,7 +86,7 @@ const CHART_COLORS = [
   "hsl(152, 69%, 41%)",
 ];
 
-// ─── Counter Animation Component ───
+// ─── Counter Animation ───
 const AnimatedValue = ({ value }: { value: string }) => {
   const numMatch = value.match(/(₹?)([\d,]+\.?\d*)(.*)/);
   const [displayed, setDisplayed] = useState(value);
@@ -99,7 +99,6 @@ const AnimatedValue = ({ value }: { value: string }) => {
     const prefix = numMatch[1];
     const targetNum = parseFloat(numMatch[2].replace(/,/g, ""));
     const suffix = numMatch[3];
-    let start = 0;
     const duration = 800;
     const startTime = performance.now();
 
@@ -107,7 +106,7 @@ const AnimatedValue = ({ value }: { value: string }) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(start + (targetNum - start) * eased);
+      const current = Math.round(targetNum * eased);
       setDisplayed(`${prefix}${current.toLocaleString()}${suffix}`);
       if (progress < 1) requestAnimationFrame(animate);
     };
@@ -128,15 +127,16 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
     {
       id: 0,
       role: "ai",
-      text: `Welcome, ${persona.name}! 👋 I'm your FinTrack AI coach. I've tailored my advice to your "${persona.tagline}" style. Ready to start your financial journey? Choose an action below or type your question.`,
+      text: `Welcome, ${persona.name}! 🎮 I'm your AI Finance Coach. I've loaded your "${persona.tagline}" playstyle. Choose a power-up below to start your mission!`,
     },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [streak] = useState(7);
   const [score] = useState(740);
+  const [level] = useState(12);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  let nextId = useRef(1);
+  const nextId = useRef(1);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -150,9 +150,9 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
     setIsTyping(true);
 
     const response = aiResponses[text] || {
-      text: `Great question! Based on your ${persona.name} profile, I'd analyze your recent activity to give you a personalized answer. Let me look into "${text}" for you — here's what I found:`,
+      text: `Analyzing "${text}" with your ${persona.name} profile... Here's what I found:`,
       insights: [
-        { label: "Quick Insight", value: "Analyzing...", change: "Based on your data", positive: true },
+        { label: "Quick Insight", value: "Processing", change: "Based on your data", positive: true },
         { label: "Recommendation", value: "Personalized", change: `Tailored for ${persona.name}`, positive: true },
       ],
     };
@@ -180,58 +180,83 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col h-[calc(100vh-64px)] md:h-screen"
+      className="flex flex-col h-[calc(100vh-64px)] md:h-screen relative overflow-hidden"
     >
+      {/* Dark game background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(250,50%,8%)] via-[hsl(260,40%,10%)] to-[hsl(220,50%,6%)]" />
+
+      {/* Subtle grid */}
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(hsl(260,80%,60%) 1px, transparent 1px), linear-gradient(90deg, hsl(260,80%,60%) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+
       {/* ═══ Mission Header ═══ */}
       <motion.div
-        initial={{ y: -20, opacity: 0 }}
+        initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.5 }}
-        className="shrink-0 bg-foreground text-background px-4 md:px-6 py-3"
+        className="shrink-0 relative z-10 border-b border-white/10"
+        style={{
+          background: `linear-gradient(135deg, ${persona.accentColor}15, transparent)`,
+          backdropFilter: "blur(20px)",
+        }}
       >
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
+        <div className="flex items-center justify-between max-w-4xl mx-auto px-4 py-3">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="text-background/60 hover:text-background transition-colors text-sm">
-              ← Back
+            <button
+              onClick={onBack}
+              className="text-white/40 hover:text-white transition-colors text-sm flex items-center gap-1"
+            >
+              ← Exit
             </button>
-            <div className="hidden sm:block h-4 w-px bg-background/20" />
-            <div className="hidden sm:block">
-              <p className="text-[10px] tracking-[0.2em] uppercase text-background/50">Mission</p>
-              <p className="text-sm font-display font-bold">Financial Freedom</p>
+            <div className="hidden sm:block h-4 w-px bg-white/10" />
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="text-xs font-bold px-2 py-0.5 rounded-md text-white" style={{ background: persona.accentColor }}>
+                LVL {level}
+              </span>
+              <div>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-white/30">Mission</p>
+                <p className="text-sm font-display font-bold text-white">Financial Freedom</p>
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-4 md:gap-6">
-            {/* Progress */}
+            {/* XP Progress */}
             <div className="hidden md:block">
-              <p className="text-[10px] text-background/50 mb-1">Progress</p>
-              <div className="w-24 h-1.5 bg-background/20 rounded-full overflow-hidden">
+              <p className="text-[10px] text-white/30 mb-1">XP Progress</p>
+              <div className="w-24 h-2 bg-white/10 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: "65%" }}
-                  transition={{ delay: 0.5, duration: 1 }}
+                  transition={{ delay: 0.5, duration: 1.2 }}
                   className="h-full rounded-full"
-                  style={{ background: persona.accentColor }}
+                  style={{ background: `linear-gradient(90deg, ${persona.accentColor}, ${persona.accentColor}aa)` }}
                 />
               </div>
             </div>
 
             {/* Score */}
             <div className="text-center">
-              <p className="text-[10px] text-background/50">Score</p>
+              <p className="text-[10px] text-white/30">Score</p>
               <p className="text-sm font-display font-bold" style={{ color: persona.accentColor }}>{score}</p>
             </div>
 
             {/* Streak */}
             <div className="text-center">
-              <p className="text-[10px] text-background/50">Streak</p>
-              <p className="text-sm font-display font-bold">🔥 {streak}d</p>
+              <p className="text-[10px] text-white/30">Streak</p>
+              <p className="text-sm font-display font-bold text-white">🔥 {streak}d</p>
             </div>
 
             {/* Avatar */}
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-lg"
-              style={{ background: `${persona.accentColor}30` }}
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-lg border border-white/10"
+              style={{ background: `${persona.accentColor}20` }}
             >
               {persona.emoji}
             </div>
@@ -240,7 +265,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
       </motion.div>
 
       {/* ═══ Conversation Area ═══ */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto relative z-10">
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
           <AnimatePresence mode="popLayout">
             {messages.map((msg) => (
@@ -252,21 +277,27 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                 layout
               >
                 {msg.role === "ai" ? (
-                  /* ── AI Message Card ── */
                   <div className="space-y-4">
-                    <div className="glass-card p-5 md:p-6 shadow-lg shadow-foreground/[0.03]">
+                    {/* AI Message Card */}
+                    <div
+                      className="p-5 md:p-6 rounded-2xl border border-white/10 shadow-lg"
+                      style={{
+                        background: `linear-gradient(135deg, hsl(260,40%,12%), hsl(260,30%,8%))`,
+                        backdropFilter: "blur(20px)",
+                      }}
+                    >
                       <div className="flex items-start gap-3 mb-3">
                         <div
-                          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-sm font-bold"
-                          style={{ background: `${persona.accentColor}15`, color: persona.accentColor }}
+                          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-sm font-bold border border-white/10"
+                          style={{ background: `${persona.accentColor}20`, color: persona.accentColor }}
                         >
                           AI
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-muted-foreground mb-0.5">FinTrack AI · just now</p>
+                          <p className="text-xs text-white/30 mb-0.5">FinTrack AI · just now</p>
                         </div>
                       </div>
-                      <p className="text-sm md:text-base leading-relaxed text-foreground/90 pl-11">
+                      <p className="text-sm md:text-base leading-relaxed text-white/80 pl-11">
                         {msg.text}
                       </p>
                     </div>
@@ -280,22 +311,29 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.15 * idx + 0.3, duration: 0.4 }}
-                            className="glass-card p-4 relative overflow-hidden group"
+                            className="p-4 rounded-xl border border-white/10 relative overflow-hidden group"
+                            style={{
+                              background: `linear-gradient(135deg, ${CHART_COLORS[idx % CHART_COLORS.length]}08, transparent)`,
+                            }}
                           >
-                            {/* Subtle accent bar */}
+                            {/* Accent bar */}
                             <div
-                              className="absolute top-0 left-0 w-1 h-full rounded-l-2xl"
+                              className="absolute top-0 left-0 w-1 h-full rounded-l-xl"
                               style={{ background: CHART_COLORS[idx % CHART_COLORS.length] }}
                             />
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 pl-2">
+                            <p className="text-[10px] uppercase tracking-wider text-white/30 mb-1 pl-2">
                               {insight.label}
                             </p>
-                            <p className="font-display text-lg md:text-xl font-bold pl-2">
+                            <p className="font-display text-lg md:text-xl font-bold text-white pl-2">
                               <AnimatedValue value={insight.value} />
                             </p>
                             {insight.change && (
                               <p className={`text-xs mt-1 pl-2 ${
-                                insight.positive ? "text-success" : insight.positive === false ? "text-destructive" : "text-muted-foreground"
+                                insight.positive
+                                  ? "text-[hsl(152,69%,50%)]"
+                                  : insight.positive === false
+                                  ? "text-[hsl(0,72%,60%)]"
+                                  : "text-white/30"
                               }`}>
                                 {insight.change}
                               </p>
@@ -317,7 +355,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                                         strokeWidth={0}
                                       >
                                         {insight.chartData.map((_, ci) => (
-                                          <Cell key={ci} fill={ci === 0 ? persona.accentColor : "hsl(0,0%,90%)"} />
+                                          <Cell key={ci} fill={ci === 0 ? persona.accentColor : "hsl(0,0%,25%)"} />
                                         ))}
                                       </Pie>
                                     </PieChart>
@@ -339,10 +377,13 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                     )}
                   </div>
                 ) : (
-                  /* ── User Message Card ── */
+                  /* User Message */
                   <div className="flex justify-end">
-                    <div className="bg-foreground text-background px-5 py-3.5 rounded-2xl rounded-br-md max-w-[80%] shadow-md">
-                      <p className="text-sm leading-relaxed">{msg.text}</p>
+                    <div
+                      className="px-5 py-3.5 rounded-2xl rounded-br-md max-w-[80%] shadow-md border border-white/10"
+                      style={{ background: persona.accentColor }}
+                    >
+                      <p className="text-sm leading-relaxed text-white">{msg.text}</p>
                     </div>
                   </div>
                 )}
@@ -357,12 +398,13 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="glass-card p-5 shadow-lg shadow-foreground/[0.03]"
+                className="p-5 rounded-2xl border border-white/10"
+                style={{ background: `linear-gradient(135deg, hsl(260,40%,12%), hsl(260,30%,8%))` }}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-sm font-bold"
-                    style={{ background: `${persona.accentColor}15`, color: persona.accentColor }}
+                    style={{ background: `${persona.accentColor}20`, color: persona.accentColor }}
                   >
                     AI
                   </div>
@@ -372,10 +414,11 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                         key={i}
                         animate={{ y: [0, -6, 0] }}
                         transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
-                        className="w-2 h-2 rounded-full bg-muted-foreground/40"
+                        className="w-2 h-2 rounded-full"
+                        style={{ background: persona.accentColor }}
                       />
                     ))}
-                    <span className="text-xs text-muted-foreground ml-2">thinking...</span>
+                    <span className="text-xs text-white/30 ml-2">thinking...</span>
                   </div>
                 </div>
               </motion.div>
@@ -386,21 +429,31 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
         </div>
       </div>
 
-      {/* ═══ Quick Actions + Input ═══ */}
-      <div className="shrink-0 border-t border-border bg-background/80 backdrop-blur-xl">
-        {/* Quick Action Chips */}
+      {/* ═══ Quick Actions (Power-ups) + Input ═══ */}
+      <div
+        className="shrink-0 border-t border-white/10 relative z-10"
+        style={{ background: "hsl(250,50%,6%)", backdropFilter: "blur(20px)" }}
+      >
+        {/* Power-up Buttons */}
         <div className="max-w-3xl mx-auto px-4 pt-3 pb-2">
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             {quickActions.map((action) => (
               <motion.button
-                key={action}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => sendMessage(action)}
+                key={action.label}
+                whileHover={{ scale: 1.08, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => sendMessage(action.label)}
                 disabled={isTyping}
-                className="shrink-0 px-4 py-2 rounded-full border border-border bg-background text-xs font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:shadow-sm transition-all duration-200 disabled:opacity-40"
+                className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-medium transition-all duration-200 disabled:opacity-30"
+                style={{
+                  borderColor: `${action.color}30`,
+                  background: `${action.color}10`,
+                  color: action.color,
+                  boxShadow: `0 0 20px ${action.color}10`,
+                }}
               >
-                {action}
+                <span className="text-base">{action.icon}</span>
+                {action.label}
               </motion.button>
             ))}
           </div>
@@ -416,14 +469,15 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
               onKeyDown={(e) => e.key === "Enter" && !isTyping && handleSend()}
               placeholder="Ask your AI coach anything..."
               disabled={isTyping}
-              className="flex-1 px-5 py-3.5 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all disabled:opacity-50"
+              className="flex-1 px-5 py-3.5 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/10 transition-all disabled:opacity-50"
             />
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleSend}
               disabled={isTyping || !input.trim()}
-              className="bg-foreground text-background px-5 py-3.5 rounded-xl text-sm font-medium transition-opacity disabled:opacity-40"
+              className="px-5 py-3.5 rounded-xl text-sm font-medium text-white transition-opacity disabled:opacity-30"
+              style={{ background: persona.accentColor }}
             >
               Send
             </motion.button>
