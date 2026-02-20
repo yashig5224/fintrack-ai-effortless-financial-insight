@@ -159,7 +159,7 @@ const PersonaSelection = ({ onSelect }: PersonaSelectionProps) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.5 }}
-      className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center py-12 px-4 relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center py-12 px-4 relative overflow-hidden"
     >
       {/* Gradient sky background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[hsl(250,50%,10%)] via-[hsl(260,40%,15%)] to-[hsl(220,50%,8%)]" />

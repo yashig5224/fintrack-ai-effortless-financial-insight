@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import AIAssistant from "@/components/ai/AIAssistant";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar,
@@ -76,7 +75,7 @@ const aiSuggestions = [
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
-
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
@@ -89,7 +88,13 @@ const Dashboard = () => {
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                if (item.id === "chat") {
+                  navigate("/coach");
+                } else {
+                  setActiveTab(item.id);
+                }
+              }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 activeTab === item.id
                   ? "bg-secondary text-foreground font-medium"
@@ -367,10 +372,8 @@ const Dashboard = () => {
             </motion.div>
           )}
 
-          {/* AI Coach tab */}
-          {activeTab === "chat" && (
-            <AIAssistant />
-          )}
+          {/* AI Coach - now on separate route */}
+          {activeTab === "chat" && null}
         </div>
       </main>
     </div>
