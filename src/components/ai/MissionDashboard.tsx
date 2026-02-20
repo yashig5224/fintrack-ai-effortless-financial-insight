@@ -180,7 +180,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col h-[calc(100vh-64px)] md:h-screen relative overflow-hidden"
+      className="flex flex-col h-screen w-screen relative overflow-hidden"
     >
       {/* Dark game background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[hsl(250,50%,8%)] via-[hsl(260,40%,10%)] to-[hsl(220,50%,6%)]" />
@@ -212,7 +212,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
               onClick={onBack}
               className="text-white/40 hover:text-white transition-colors text-sm flex items-center gap-1"
             >
-              ← Exit
+              ← Back
             </button>
             <div className="hidden sm:block h-4 w-px bg-white/10" />
             <div className="hidden sm:flex items-center gap-2">
