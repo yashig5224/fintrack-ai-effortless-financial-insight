@@ -1,169 +1,106 @@
 import { motion } from "framer-motion";
-import { useRef } from "react";
 
 interface Ability {
-  emoji: string;
+  icon: string;
   title: string;
   description: string;
   stat: string;
   statLabel: string;
-  gradient: string;
-  glowColor: string;
-  borderColor: string;
+  accentHsl: string;
 }
 
 const abilities: Ability[] = [
   {
-    emoji: "🔍",
-    title: "Smart Spend Scanner",
-    description: "AI detects wasteful spending and shows insights automatically.",
+    icon: "👁",
+    title: "Expense Vision",
+    description: "AI detects wasteful spending and surfaces insights automatically.",
     stat: "₹4.2K",
     statLabel: "saved this month",
-    gradient: "from-[hsl(217,80%,12%)] to-[hsl(217,60%,22%)]",
-    glowColor: "hsl(217, 91%, 60%)",
-    borderColor: "hsl(217,91%,60%)",
+    accentHsl: "217 91% 60%",
   },
   {
-    emoji: "🏗️",
-    title: "Budget Builder",
+    icon: "🏛",
+    title: "Budget Architect",
     description: "Auto-create budgets based on your income patterns.",
     stat: "3",
     statLabel: "budgets active",
-    gradient: "from-[hsl(152,60%,10%)] to-[hsl(152,50%,20%)]",
-    glowColor: "hsl(152, 69%, 41%)",
-    borderColor: "hsl(152,69%,41%)",
+    accentHsl: "152 69% 41%",
   },
   {
-    emoji: "⚔️",
-    title: "Goal Quest System",
+    icon: "🎯",
+    title: "Goal Quest",
     description: "Turn goals into missions with progress tracking.",
     stat: "65%",
     statLabel: "quest complete",
-    gradient: "from-[hsl(38,80%,12%)] to-[hsl(38,60%,22%)]",
-    glowColor: "hsl(38, 92%, 50%)",
-    borderColor: "hsl(38,92%,50%)",
+    accentHsl: "38 92% 50%",
   },
   {
-    emoji: "🤖",
+    icon: "🤖",
     title: "AI Finance Coach",
     description: "Chat with your personal AI assistant for advice.",
     stat: "24/7",
     statLabel: "always on",
-    gradient: "from-[hsl(262,60%,12%)] to-[hsl(262,50%,22%)]",
-    glowColor: "hsl(262, 83%, 58%)",
-    borderColor: "hsl(262,83%,58%)",
+    accentHsl: "262 83% 58%",
   },
   {
-    emoji: "📈",
-    title: "Wealth Growth Engine",
+    icon: "📈",
+    title: "Growth Engine",
     description: "Investment + savings projections powered by AI.",
     stat: "12%",
     statLabel: "avg returns",
-    gradient: "from-[hsl(330,60%,12%)] to-[hsl(330,50%,22%)]",
-    glowColor: "hsl(330, 81%, 60%)",
-    borderColor: "hsl(330,81%,60%)",
+    accentHsl: "330 81% 60%",
   },
   {
-    emoji: "⚡",
-    title: "Real-time Reports",
-    description: "Live analytics with charts and trends.",
+    icon: "⚡",
+    title: "Live Insights",
+    description: "Real-time analytics with charts and trends.",
     stat: "Live",
     statLabel: "data sync",
-    gradient: "from-[hsl(180,60%,10%)] to-[hsl(180,50%,20%)]",
-    glowColor: "hsl(180, 70%, 45%)",
-    borderColor: "hsl(180,70%,45%)",
+    accentHsl: "180 70% 45%",
   },
 ];
 
 const AbilityCard = ({ ability, index }: { ability: Ability; index: number }) => {
-  const ref = useRef<HTMLDivElement>(null);
-
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 60 }}
+      initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ delay: index * 0.1, duration: 0.6, type: "spring", stiffness: 120 }}
-      whileHover={{ y: -12, scale: 1.03 }}
-      className="group relative cursor-pointer"
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ delay: index * 0.08, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={{ y: -6 }}
+      className="group relative"
     >
-      {/* Glow behind card */}
       <div
-        className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-40 blur-xl transition-opacity duration-500"
-        style={{ background: ability.glowColor }}
-      />
-
-      <div
-        className="relative rounded-3xl p-6 md:p-8 border overflow-hidden h-full"
-        style={{
-          background: `linear-gradient(135deg, ${ability.gradient.includes("from-") ? "" : ""}hsl(250,50%,8%), hsl(260,40%,12%))`,
-          borderColor: `${ability.glowColor}30`,
-        }}
+        className="relative rounded-3xl p-7 md:p-8 h-full border border-border/60 bg-background/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-500"
       >
-        {/* Gradient overlay */}
-        <div
-          className={`absolute inset-0 bg-gradient-to-br ${ability.gradient} opacity-60`}
-        />
+        {/* Icon */}
+        <div className="text-3xl md:text-4xl mb-5">{ability.icon}</div>
 
-        {/* Floating particles on hover */}
-        <div className="absolute inset-0 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-          {[...Array(6)].map((_, i) => (
-            <motion.div
-              key={i}
-              animate={{ y: [-20, -60], opacity: [0, 1, 0] }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
-              className="absolute w-1 h-1 rounded-full"
-              style={{
-                background: ability.glowColor,
-                left: `${15 + i * 15}%`,
-                bottom: "20%",
-              }}
-            />
-          ))}
+        {/* Title */}
+        <h3 className="font-display text-lg md:text-xl font-semibold text-foreground mb-2 tracking-tight">
+          {ability.title}
+        </h3>
+
+        {/* Description */}
+        <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+          {ability.description}
+        </p>
+
+        {/* Stat */}
+        <div className="flex items-baseline gap-2 pt-4 border-t border-border/50">
+          <span
+            className="text-2xl md:text-3xl font-bold font-display"
+            style={{ color: `hsl(${ability.accentHsl})` }}
+          >
+            {ability.stat}
+          </span>
+          <span className="text-muted-foreground/60 text-xs">{ability.statLabel}</span>
         </div>
 
-        <div className="relative z-10">
-          {/* Emoji icon */}
-          <motion.div
-            className="text-4xl md:text-5xl mb-5"
-            whileHover={{ rotate: [0, -10, 10, 0], scale: 1.2 }}
-            transition={{ duration: 0.4 }}
-          >
-            {ability.emoji}
-          </motion.div>
-
-          {/* Title */}
-          <h3 className="font-display text-lg md:text-xl font-bold text-white mb-2 tracking-tight">
-            {ability.title}
-          </h3>
-
-          {/* Description */}
-          <p className="text-white/50 text-sm leading-relaxed mb-6">
-            {ability.description}
-          </p>
-
-          {/* Stat bar */}
-          <div
-            className="flex items-baseline gap-2 pt-4 border-t"
-            style={{ borderColor: `${ability.glowColor}20` }}
-          >
-            <span
-              className="text-2xl md:text-3xl font-bold font-display"
-              style={{ color: ability.glowColor }}
-            >
-              {ability.stat}
-            </span>
-            <span className="text-white/30 text-xs">{ability.statLabel}</span>
-          </div>
-        </div>
-
-        {/* Corner accent */}
+        {/* Subtle top accent line */}
         <div
-          className="absolute top-0 right-0 w-20 h-20 opacity-20 group-hover:opacity-40 transition-opacity"
-          style={{
-            background: `radial-gradient(circle at top right, ${ability.glowColor}, transparent 70%)`,
-          }}
+          className="absolute top-0 left-8 right-8 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{ background: `linear-gradient(90deg, transparent, hsl(${ability.accentHsl} / 0.4), transparent)` }}
         />
       </div>
     </motion.div>
@@ -172,53 +109,33 @@ const AbilityCard = ({ ability, index }: { ability: Ability; index: number }) =>
 
 const AbilitiesSection = () => {
   return (
-    <section className="relative py-24 md:py-36 overflow-hidden">
-      {/* Dark background for this section */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(250,50%,6%)] via-[hsl(260,40%,8%)] to-[hsl(250,50%,6%)]" />
-
-      {/* Subtle grid */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(hsl(260,80%,60%) 1px, transparent 1px), linear-gradient(90deg, hsl(260,80%,60%) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-        }}
-      />
+    <section className="relative py-24 md:py-36 overflow-hidden bg-[hsl(0,0%,98%)]">
+      {/* Soft pastel blobs */}
+      <div className="absolute top-20 left-[10%] w-[500px] h-[500px] rounded-full bg-[hsl(217,91%,60%/0.06)] blur-[100px]" />
+      <div className="absolute bottom-20 right-[10%] w-[400px] h-[400px] rounded-full bg-[hsl(262,83%,58%/0.05)] blur-[100px]" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[hsl(152,69%,41%/0.04)] blur-[120px]" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="text-center mb-16 md:mb-20"
         >
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-xs tracking-[0.3em] uppercase mb-4 font-medium"
-            style={{ color: "hsl(260, 80%, 70%)" }}
-          >
-            ⚡ Unlock Your Powers ⚡
-          </motion.p>
-          <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-5">
-            Your Financial
+          <p className="text-xs tracking-[0.25em] uppercase mb-4 font-medium text-muted-foreground">
+            ✦ Powerful Tools
+          </p>
+          <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-foreground tracking-tight mb-5">
+            Unlock Your Financial
             <br />
-            <span
-              className="bg-clip-text text-transparent"
-              style={{
-                backgroundImage:
-                  "linear-gradient(135deg, hsl(260,80%,70%), hsl(330,80%,60%), hsl(38,92%,50%))",
-              }}
-            >
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground via-muted-foreground to-foreground">
               Superpowers
             </span>
           </h2>
-          <p className="text-white/35 max-w-lg mx-auto text-sm md:text-base">
-            Each ability is designed to level up your financial game. Activate them all.
+          <p className="text-muted-foreground max-w-lg mx-auto text-sm md:text-base">
+            Everything you need to master your money — intelligent, effortless, beautiful.
           </p>
         </motion.div>
 
