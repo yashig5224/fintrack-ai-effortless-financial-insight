@@ -7,7 +7,7 @@ interface TransitionOverlayProps {
 }
 
 const TransitionOverlay = ({ isVisible, onComplete }: TransitionOverlayProps) => {
-  const [loadingText, setLoadingText] = useState("Setting up your experience");
+  const [loadingText, setLoadingText] = useState("Entering AI Finance World");
   const [dots, setDots] = useState("");
 
   useEffect(() => {
@@ -15,25 +15,12 @@ const TransitionOverlay = ({ isVisible, onComplete }: TransitionOverlayProps) =>
 
     const dotInterval = setInterval(() => {
       setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
-    }, 400);
+    }, 200);
 
-    const texts = [
-      "Setting up your experience",
-      "Loading your financial data",
-      "Preparing AI Coach",
-      "Almost ready",
-    ];
-    let textIdx = 0;
-    const textInterval = setInterval(() => {
-      textIdx = (textIdx + 1) % texts.length;
-      setLoadingText(texts[textIdx]);
-    }, 1200);
-
-    const timer = setTimeout(onComplete, 3000);
+    const timer = setTimeout(onComplete, 900); // 900ms transition as requested
 
     return () => {
       clearInterval(dotInterval);
-      clearInterval(textInterval);
       clearTimeout(timer);
     };
   }, [isVisible, onComplete]);
@@ -42,61 +29,75 @@ const TransitionOverlay = ({ isVisible, onComplete }: TransitionOverlayProps) =>
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.02 }}
-          transition={{ duration: 0.4 }}
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+          initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+          animate={{ opacity: 1, backdropFilter: "blur(20px)" }}
+          exit={{ opacity: 0, backdropFilter: "blur(0px)", scale: 1.05 }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-background/80"
         >
-          {/* Light background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(240,40%,97%)] via-background to-[hsl(220,30%,96%)]" />
-
-          {/* Soft glow */}
+          {/* Floating gradient overlay expanding */}
           <motion.div
-            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-            transition={{ duration: 2.5, repeat: Infinity }}
-            className="absolute w-[500px] h-[500px] rounded-full bg-[hsl(262,83%,58%/0.08)] blur-[80px]"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: [0.8, 1.5, 2], opacity: [0, 1, 1] }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
+            className="absolute inset-0 bg-gradient-to-br from-[hsl(262,83%,58%/0.15)] via-transparent to-[hsl(217,91%,60%/0.15)] rounded-full blur-[100px]"
           />
 
-          {/* Center content */}
-          <div className="relative z-10 text-center px-6">
+          {/* Floating Coins / Particles */}
+          {Array.from({ length: 12 }).map((_, i) => (
             <motion.div
-              animate={{ scale: [1, 1.08, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-5xl sm:text-6xl mb-8"
+              key={i}
+              initial={{ 
+                y: "100vh", 
+                x: `${(Math.random() - 0.5) * 100}vw`, 
+                scale: Math.random() * 0.5 + 0.5,
+                rotate: Math.random() * 360
+              }}
+              animate={{ 
+                y: "-20vh",
+                rotate: Math.random() * 360 + 360
+              }}
+              transition={{ 
+                duration: 0.8 + Math.random() * 0.4, 
+                ease: "easeOut",
+              }}
+              className="absolute w-8 h-8 rounded-full border-2 border-[hsl(38,92%,50%/0.4)] bg-[hsl(38,92%,50%/0.2)] backdrop-blur-sm flex items-center justify-center text-xs shadow-[0_0_15px_rgba(250,200,50,0.3)]"
             >
-              ✨
+              <div className="w-4 h-4 rounded-full border border-[hsl(38,92%,50%/0.5)]" />
+            </motion.div>
+          ))}
+
+          {/* Center content: Zoom animation */}
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 1.1, opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="relative z-10 text-center px-6"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              className="text-6xl sm:text-7xl mb-6 drop-shadow-2xl"
+            >
+              🔮
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="font-display text-2xl sm:text-4xl font-bold text-foreground mb-3 tracking-tight"
-            >
+            <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-3 tracking-tight">
               {loadingText}
-              <span className="text-muted-foreground">{dots}</span>
-            </motion.h1>
+              <span className="text-muted-foreground w-8 inline-block text-left">{dots}</span>
+            </h1>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="text-muted-foreground text-sm mb-10"
-            >
-              Your personalized finance assistant awaits
-            </motion.p>
-
-            {/* Loading bar */}
-            <motion.div className="w-56 sm:w-72 h-1.5 bg-[hsl(0,0%,92%)] rounded-full mx-auto overflow-hidden">
+            {/* Quick loading bar */}
+            <motion.div className="w-64 h-1.5 bg-border/40 rounded-full mx-auto overflow-hidden mt-8">
               <motion.div
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
-                transition={{ duration: 2.8, ease: "easeInOut" }}
-                className="h-full rounded-full bg-gradient-to-r from-[hsl(262,83%,58%/0.6)] via-[hsl(217,91%,60%/0.6)] to-[hsl(152,69%,41%/0.6)]"
+                transition={{ duration: 0.7, ease: "circOut" }}
+                className="h-full rounded-full bg-gradient-to-r from-[hsl(262,83%,58%)] via-[hsl(217,91%,60%)] to-[hsl(152,69%,41%)]"
               />
             </motion.div>
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
