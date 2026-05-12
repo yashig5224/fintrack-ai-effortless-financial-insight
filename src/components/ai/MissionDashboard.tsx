@@ -21,59 +21,50 @@ interface Insight {
 }
 
 const aiResponses: Record<string, { text: string; insights: Insight[] }> = {
-  "Analyze Spending": {
-    text: "📊 I've scanned your spending for the past 30 days. Your dining expenses are above budget, but transport costs dropped nicely!",
+  "Analyze my spending": {
+    text: "I've analyzed your recent transactions. You're doing great overall, but dining out is slightly above your usual trend.",
     insights: [
-      { label: "Total Spent", value: "₹27,940", change: "-5.2% vs last month", positive: true },
-      { label: "Dining Out", value: "₹4,800", change: "22% above budget", positive: false, chartData: [{ name: "Budget", value: 4000 }, { name: "Spent", value: 4800 }] },
-      { label: "Transport", value: "₹3,100", change: "38% under budget", positive: true },
-      { label: "Subscriptions", value: "3 active", change: "₹1,847/mo total" },
+      { label: "Saved this week", value: "₹2,400", change: "+12% vs last week", positive: true },
+      { label: "Food spending", value: "₹4,800", change: "22% above budget", positive: false, chartData: [{ name: "Budget", value: 4000 }, { name: "Spent", value: 4800 }] },
     ],
   },
-  "Create Budget": {
-    text: "🎯 Based on your ₹55,000 income and spending patterns, here's an optimized 50/30/20 budget:",
+  "Create a budget": {
+    text: "Let's build a smart budget. Based on your income, here's an optimized 50/30/20 allocation for this month.",
     insights: [
-      { label: "Needs (50%)", value: "₹27,500", change: "Rent, Bills, Groceries" },
-      { label: "Wants (30%)", value: "₹16,500", change: "Dining, Shopping, Fun" },
-      { label: "Savings (20%)", value: "₹11,000", change: "Goals + Emergency" },
-      { label: "Projected Savings", value: "₹1,32,000/yr", change: "+23% vs current", positive: true },
+      { label: "Needs", value: "50%", change: "₹27,500" },
+      { label: "Wants", value: "30%", change: "₹16,500" },
+      { label: "Savings", value: "20%", change: "₹11,000", positive: true, chartData: [{ name: "Needs", value: 50 }, { name: "Wants", value: 30 }, { name: "Savings", value: 20 }] },
     ],
   },
-  "Save More": {
-    text: "💡 Found 5 ways to save more this month:",
+  "Save more money": {
+    text: "I found a few quick wins to boost your savings. Small changes can make a big difference!",
     insights: [
-      { label: "Cancel Unused Sub", value: "Save ₹499/mo", change: "Spotify unused 3 weeks", positive: true },
-      { label: "Meal Prep", value: "Save ₹2,400/mo", change: "Reduce dining 50%", positive: true },
-      { label: "Switch Insurance", value: "Save ₹3,600/yr", change: "Better plan available", positive: true },
-      { label: "Total Potential", value: "₹6,499/mo", change: "₹77,988 per year!", positive: true },
+      { label: "Food spending reduced", value: "12%", change: "Potential ₹1,200 saved", positive: true },
+      { label: "Switch Mobile Plan", value: "₹400/mo", change: "Cheaper plan found", positive: true },
     ],
   },
-  "Monthly Report": {
-    text: "📈 Complete financial report: income is up and expenses are down!",
+  "Show subscriptions": {
+    text: "You currently have 8 active subscriptions. I noticed a few you haven't used recently.",
     insights: [
-      { label: "Net Income", value: "+₹27,060", change: "+23% vs Feb", positive: true },
-      { label: "Top Category", value: "Food ₹8,240", change: "29.5% of spending", chartData: [{ name: "Food", value: 8240 }, { name: "Transport", value: 4500 }, { name: "Shopping", value: 6200 }, { name: "Bills", value: 5800 }, { name: "Fun", value: 3200 }] },
-      { label: "Savings Rate", value: "49.2%", change: "Above target of 30%", positive: true },
-      { label: "Goal Progress", value: "65%", change: "Emergency Fund on track", positive: true },
+      { label: "Active Subs", value: "8", change: "₹2,840/mo" },
+      { label: "Unused Subs", value: "3", change: "Save ₹1,150/mo", positive: true, chartData: [{ name: "Active", value: 5 }, { name: "Unused", value: 3 }] },
     ],
   },
-  "Goals Plan": {
-    text: "🎯 3 active savings goals. Emergency Fund is looking great!",
+  "Goal planning": {
+    text: "Your goals are looking solid. You're on track to hit your Emergency Fund target early!",
     insights: [
-      { label: "Emergency Fund", value: "68%", change: "₹1,36,000 / ₹2,00,000", positive: true, chartData: [{ name: "Saved", value: 68 }, { name: "Left", value: 32 }] },
-      { label: "Vacation Fund", value: "56%", change: "₹45,000 / ₹80,000" },
-      { label: "New Laptop", value: "80%", change: "₹72,000 / ₹90,000", positive: true },
-      { label: "Est. Completion", value: "Aug 2026", change: "All goals", positive: true },
+      { label: "Goal progress", value: "68%", change: "Emergency Fund", positive: true, chartData: [{ name: "Done", value: 68 }, { name: "Left", value: 32 }] },
+      { label: "Est. Completion", value: "Aug 2026", change: "2 months early!", positive: true },
     ],
   },
 };
 
 const quickActions = [
-  { label: "Analyze Spending", icon: "⚡" },
-  { label: "Create Budget", icon: "🛡️" },
-  { label: "Save More", icon: "💎" },
-  { label: "Monthly Report", icon: "📊" },
-  { label: "Goals Plan", icon: "🎯" },
+  "Analyze my spending",
+  "Create a budget",
+  "Save more money",
+  "Show subscriptions",
+  "Goal planning"
 ];
 
 const CHART_COLORS = [
@@ -93,7 +84,7 @@ const AnimatedValue = ({ value }: { value: string }) => {
     const prefix = numMatch[1];
     const targetNum = parseFloat(numMatch[2].replace(/,/g, ""));
     const suffix = numMatch[3];
-    const duration = 700;
+    const duration = 1000;
     const startTime = performance.now();
     const animate = (now: number) => {
       const elapsed = now - startTime;
@@ -120,7 +111,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
     {
       id: 0,
       role: "ai",
-      text: `Welcome! 👋 I'm your AI Finance Coach, tailored for the "${persona.name}" style. Choose an action below to get started!`,
+      text: `Welcome to your Financial Mission! 👋 I'm your personalized ${persona.name} Coach. What's our focus for today?`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -140,9 +131,9 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
     setIsTyping(true);
 
     const response = aiResponses[text] || {
-      text: `Analyzing "${text}" for your ${persona.name} profile...`,
+      text: `I'm analyzing your request for "${text}" based on your ${persona.name} profile...`,
       insights: [
-        { label: "Quick Insight", value: "Processing", change: "Based on your data", positive: true },
+        { label: "Processing", value: "Insights", change: "Gathering data", positive: true },
       ],
     };
 
@@ -155,7 +146,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
         insights: response.insights,
       };
       setMessages((prev) => [...prev, aiMsg]);
-    }, 1000 + Math.random() * 600);
+    }, 1200 + Math.random() * 800); // More natural typing delay
   };
 
   const handleSend = () => {
@@ -169,143 +160,202 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="flex flex-col h-screen w-screen relative overflow-hidden bg-[hsl(0,0%,98%)]"
+      className="flex flex-col h-[100dvh] w-screen relative overflow-hidden bg-background"
     >
-      {/* Light background blobs */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-[hsl(262,83%,58%/0.04)] blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full bg-[hsl(217,91%,60%/0.04)] blur-[80px] pointer-events-none" />
+      {/* Immersive Background: Soft light beams, particles, layered depth */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(240,40%,98%)] to-[hsl(220,30%,96%)] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[10%] w-[600px] h-[600px] rounded-full bg-[hsl(262,83%,58%/0.03)] blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[10%] w-[500px] h-[500px] rounded-full bg-[hsl(217,91%,60%/0.04)] blur-[100px] pointer-events-none" />
+      <div className="absolute top-[30%] left-[50%] -translate-x-1/2 w-[800px] h-[300px] rounded-[100%] bg-[hsl(38,92%,50%/0.02)] blur-[100px] pointer-events-none" />
 
-      {/* ═══ Header ═══ */}
+      {/* Floating particles */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <motion.div
+          key={`bg-particle-${i}`}
+          animate={{ 
+            y: ["0vh", "-100vh"],
+            x: [0, Math.sin(i) * 50, 0],
+            opacity: [0, 0.5, 0]
+          }}
+          transition={{ 
+            duration: 15 + Math.random() * 10, 
+            repeat: Infinity, 
+            ease: "linear",
+            delay: Math.random() * 5
+          }}
+          className="absolute bottom-0 w-2 h-2 rounded-full bg-[hsl(217,91%,60%/0.3)] blur-[1px] pointer-events-none"
+          style={{ left: `${10 + Math.random() * 80}%` }}
+        />
+      ))}
+
+      {/* ═══ Top Mission HUD Bar ═══ */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.1, duration: 0.4 }}
-        className="shrink-0 relative z-10 border-b border-border/40 bg-background/80 backdrop-blur-xl"
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="shrink-0 relative z-20 pt-4 pb-2 px-4 sm:px-6 sm:pt-6"
       >
-        <div className="flex items-center justify-between max-w-3xl mx-auto px-4 py-3">
-          <div className="flex items-center gap-3">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+          {/* Back & Mission Title */}
+          <div className="flex items-center gap-3 sm:gap-5">
             <button
               onClick={onBack}
-              className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center gap-1"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-background/50 border border-border/50 backdrop-blur-md text-foreground hover:bg-background/80 transition-colors shadow-sm"
             >
-              ← Back
+              ←
             </button>
-            <div className="hidden sm:block h-4 w-px bg-border/60" />
-            <div className="hidden sm:flex items-center gap-2">
-              <span className="text-lg">{persona.emoji}</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold tracking-widest uppercase text-[hsl(262,83%,58%)]">Current Mission</span>
+              </div>
+              <h2 className="text-base sm:text-xl font-display font-bold text-foreground tracking-tight flex items-center gap-2">
+                Financial Freedom <span className="text-xl">🎯</span>
+              </h2>
+            </div>
+          </div>
+
+          {/* Gamified Stats */}
+          <div className="flex items-center gap-3 sm:gap-6">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/60 border border-border/50 backdrop-blur-md shadow-sm">
+              <span className="text-lg">🔥</span>
               <div>
-                <p className="text-sm font-display font-semibold text-foreground">{persona.name}</p>
-                <p className="text-[10px] text-muted-foreground">AI Finance Coach</p>
+                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-none">Streak</div>
+                <div className="text-sm font-bold text-foreground leading-none mt-0.5">12 Days</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/60 border border-border/50 backdrop-blur-md shadow-sm">
+              <span className="text-lg">💎</span>
+              <div>
+                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-none">Coins</div>
+                <div className="text-sm font-bold text-foreground leading-none mt-0.5">2,450</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-foreground text-background shadow-md">
+              <span className="text-lg" style={{ color: accentColor }}>★</span>
+              <div>
+                <div className="text-[10px] text-background/70 uppercase font-bold tracking-wider leading-none">Lvl {persona.level}</div>
+                <div className="text-sm font-bold leading-none mt-0.5">Rank up</div>
               </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-4">
-            <div className="text-center">
-              <p className="text-[10px] text-muted-foreground">Streak</p>
-              <p className="text-sm font-display font-bold text-foreground">🔥 7d</p>
-            </div>
-            <div className="text-center hidden sm:block">
-              <p className="text-[10px] text-muted-foreground">Score</p>
-              <p className="text-sm font-display font-bold" style={{ color: accentColor }}>740</p>
-            </div>
-          </div>
+        </div>
+        
+        {/* Level Progress Bar */}
+        <div className="max-w-4xl mx-auto mt-4 h-1.5 w-full bg-border/40 rounded-full overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: "65%" }}
+            transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+            className="h-full rounded-full"
+            style={{ background: `linear-gradient(90deg, hsl(262,83%,58%), ${accentColor})` }}
+          />
         </div>
       </motion.div>
 
-      {/* ═══ Chat Area ═══ */}
-      <div className="flex-1 overflow-y-auto relative z-10">
-        <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+      {/* ═══ Main Chat Area ═══ */}
+      <div className="flex-1 overflow-y-auto relative z-10 scrollbar-none pb-32">
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
           <AnimatePresence mode="popLayout">
             {messages.map((msg) => (
               <motion.div
                 key={msg.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.4, type: "spring", stiffness: 250, damping: 25 }}
                 layout
+                className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 {msg.role === "ai" ? (
-                  <div className="space-y-3">
-                    <div className="p-4 sm:p-5 rounded-2xl border border-border/50 bg-background/80 backdrop-blur-sm shadow-sm">
-                      <div className="flex items-start gap-3 mb-2">
-                        <div
-                          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-sm"
-                          style={{ background: `hsl(${persona.accentHsl} / 0.1)`, color: accentColor }}
-                        >
-                          {persona.emoji}
-                        </div>
-                        <p className="text-xs text-muted-foreground pt-1.5">AI Coach · just now</p>
+                  <div className="flex gap-3 sm:gap-4 max-w-[90%] sm:max-w-[80%]">
+                    {/* AI Avatar */}
+                    <div className="shrink-0 relative">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[14px] bg-background/80 backdrop-blur-xl border border-border/50 shadow-sm flex items-center justify-center text-xl sm:text-2xl z-10 relative">
+                        {persona.emoji}
                       </div>
-                      <p className="text-sm leading-relaxed text-foreground/80 pl-11">{msg.text}</p>
+                      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(262,83%,58%/0.2)] to-transparent rounded-[14px] blur-md -z-10" />
                     </div>
-
-                    {msg.insights && msg.insights.length > 0 && (
-                      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 pl-2 sm:pl-6">
-                        {msg.insights.map((insight, idx) => (
-                          <motion.div
-                            key={insight.label}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.12 * idx + 0.2, duration: 0.3 }}
-                            className="p-3 sm:p-4 rounded-xl border border-border/50 bg-background/80 backdrop-blur-sm shadow-sm"
-                          >
-                            <div
-                              className="w-1 h-full absolute top-0 left-0 rounded-l-xl"
-                              style={{ background: CHART_COLORS[idx % CHART_COLORS.length] }}
-                            />
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                              {insight.label}
-                            </p>
-                            <p className="font-display text-base sm:text-lg font-bold text-foreground">
-                              <AnimatedValue value={insight.value} />
-                            </p>
-                            {insight.change && (
-                              <p className={`text-[11px] mt-0.5 ${
-                                insight.positive
-                                  ? "text-[hsl(152,69%,41%)]"
-                                  : insight.positive === false
-                                  ? "text-[hsl(0,72%,51%)]"
-                                  : "text-muted-foreground"
-                              }`}>
-                                {insight.change}
-                              </p>
-                            )}
-
-                            {insight.chartData && (
-                              <div className="mt-2 h-10">
-                                <ResponsiveContainer width="100%" height="100%">
-                                  {insight.chartData.length <= 2 ? (
-                                    <PieChart>
-                                      <Pie data={insight.chartData} cx="50%" cy="50%" innerRadius={8} outerRadius={16} dataKey="value" strokeWidth={0}>
-                                        {insight.chartData.map((_, ci) => (
-                                          <Cell key={ci} fill={ci === 0 ? accentColor : "hsl(0,0%,90%)"} />
-                                        ))}
-                                      </Pie>
-                                    </PieChart>
-                                  ) : (
-                                    <BarChart data={insight.chartData}>
-                                      <Bar dataKey="value" radius={[2, 2, 0, 0]}>
-                                        {insight.chartData.map((_, ci) => (
-                                          <Cell key={ci} fill={CHART_COLORS[ci % CHART_COLORS.length]} />
-                                        ))}
-                                      </Bar>
-                                    </BarChart>
-                                  )}
-                                </ResponsiveContainer>
-                              </div>
-                            )}
-                          </motion.div>
-                        ))}
+                    
+                    {/* AI Message Card */}
+                    <div className="space-y-4 w-full">
+                      <div className="p-5 sm:p-6 rounded-[24px] rounded-tl-[8px] bg-background/70 backdrop-blur-xl border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+                        {/* Soft pastel accent gradient inside card */}
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[hsl(262,83%,58%/0.5)] to-transparent opacity-50" />
+                        <p className="text-base sm:text-lg leading-relaxed text-foreground/90 font-medium">
+                          {msg.text}
+                        </p>
                       </div>
-                    )}
+
+                      {/* AI Insights Cards */}
+                      {msg.insights && msg.insights.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                          {msg.insights.map((insight, idx) => (
+                            <motion.div
+                              key={insight.label}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.2 + idx * 0.1, duration: 0.5, type: "spring" }}
+                              whileHover={{ y: -4, scale: 1.02 }}
+                              className="p-5 rounded-[20px] bg-background border border-border/60 shadow-sm hover:shadow-md transition-all relative overflow-hidden group"
+                            >
+                              <div className="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-border/50 to-transparent rounded-full blur-2xl group-hover:from-[hsl(262,83%,58%/0.1)] transition-colors" />
+                              
+                              <p className="text-xs uppercase tracking-widest font-bold text-muted-foreground mb-2">
+                                {insight.label}
+                              </p>
+                              <p className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1">
+                                <AnimatedValue value={insight.value} />
+                              </p>
+                              
+                              {insight.change && (
+                                <div className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-md ${
+                                  insight.positive
+                                    ? "bg-[hsl(152,69%,41%/0.1)] text-[hsl(152,69%,41%)]"
+                                    : insight.positive === false
+                                    ? "bg-[hsl(0,72%,51%/0.1)] text-[hsl(0,72%,51%)]"
+                                    : "bg-muted text-muted-foreground"
+                                }`}>
+                                  {insight.positive ? "↗" : insight.positive === false ? "↘" : "→"} {insight.change}
+                                </div>
+                              )}
+
+                              {insight.chartData && (
+                                <div className="mt-4 h-12 w-full opacity-80">
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    {insight.chartData.length <= 2 ? (
+                                      <PieChart>
+                                        <Pie data={insight.chartData} cx="80%" cy="50%" innerRadius={12} outerRadius={24} dataKey="value" strokeWidth={0}>
+                                          {insight.chartData.map((_, ci) => (
+                                            <Cell key={ci} fill={ci === 0 ? accentColor : "hsl(0,0%,90%)"} />
+                                          ))}
+                                        </Pie>
+                                      </PieChart>
+                                    ) : (
+                                      <BarChart data={insight.chartData}>
+                                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                                          {insight.chartData.map((_, ci) => (
+                                            <Cell key={ci} fill={CHART_COLORS[ci % CHART_COLORS.length]} />
+                                          ))}
+                                        </Bar>
+                                      </BarChart>
+                                    )}
+                                  </ResponsiveContainer>
+                                </div>
+                              )}
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex justify-end">
-                    <div className="px-4 py-3 rounded-2xl rounded-br-md max-w-[80%] shadow-sm text-background text-sm"
-                      style={{ background: accentColor }}
-                    >
-                      {msg.text}
+                  <div className="max-w-[85%] sm:max-w-[70%]">
+                    <div className="p-4 sm:p-5 rounded-[24px] rounded-tr-[8px] bg-foreground text-background shadow-lg relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
+                      <p className="text-base sm:text-lg leading-relaxed relative z-10">
+                        {msg.text}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -318,57 +368,64 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="p-4 rounded-2xl border border-border/50 bg-background/80 backdrop-blur-sm shadow-sm"
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="flex gap-4 max-w-[80%]"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm"
-                    style={{ background: `hsl(${persona.accentHsl} / 0.1)` }}
-                  >
-                    {persona.emoji}
-                  </div>
-                  <div className="flex gap-1.5 items-center">
-                    {[0, 1, 2].map((i) => (
-                      <motion.div
-                        key={i}
-                        animate={{ y: [0, -4, 0] }}
-                        transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.12 }}
-                        className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40"
-                      />
-                    ))}
-                    <span className="text-xs text-muted-foreground ml-2">thinking...</span>
-                  </div>
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[14px] bg-background/80 backdrop-blur-xl border border-border/50 flex items-center justify-center text-xl sm:text-2xl shrink-0 opacity-70">
+                  {persona.emoji}
+                </div>
+                <div className="p-5 rounded-[24px] rounded-tl-[8px] bg-background/50 backdrop-blur-xl border border-border/50 flex items-center gap-2">
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ y: [0, -6, 0], scale: [1, 1.2, 1] }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+                      className="w-2 h-2 rounded-full"
+                      style={{ background: accentColor }}
+                    />
+                  ))}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} className="h-4" />
         </div>
       </div>
 
-      {/* ═══ Quick Actions + Input ═══ */}
-      <div className="shrink-0 border-t border-border/40 bg-background/80 backdrop-blur-xl relative z-10">
-        <div className="max-w-3xl mx-auto px-4 pt-3 pb-2">
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {quickActions.map((action) => (
+      {/* ═══ Floating Action / Input Area ═══ */}
+      <motion.div 
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.5, type: "spring" }}
+        className="absolute bottom-0 left-0 right-0 z-30 pointer-events-none"
+      >
+        <div className="max-w-4xl mx-auto px-4 pb-6 sm:pb-8 pt-10 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-auto">
+          
+          {/* Smart Suggestion Chips */}
+          <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-4 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+            {quickActions.map((action, i) => (
               <motion.button
-                key={action.label}
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => sendMessage(action.label)}
+                key={action}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 + i * 0.05 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => sendMessage(action)}
                 disabled={isTyping}
-                className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border/50 bg-background text-xs font-medium text-foreground/70 hover:text-foreground hover:border-border hover:shadow-sm transition-all duration-200 disabled:opacity-30"
+                className="shrink-0 px-4 sm:px-5 py-2.5 rounded-full border border-border/60 bg-background/80 backdrop-blur-xl text-sm font-medium text-foreground hover:border-border hover:shadow-md transition-all disabled:opacity-40 disabled:hover:scale-100 disabled:hover:y-0"
               >
-                <span>{action.icon}</span>
-                {action.label}
+                {action}
               </motion.button>
             ))}
           </div>
-        </div>
 
-        <div className="max-w-3xl mx-auto px-4 pb-4 sm:pb-5">
-          <div className="flex gap-2">
+          {/* Floating Input Container */}
+          <div className="relative flex items-center bg-background/90 backdrop-blur-2xl border border-border/80 rounded-[28px] p-2 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+            <button className="w-12 h-12 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0">
+              🎤
+            </button>
             <input
               type="text"
               value={input}
@@ -376,21 +433,21 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
               onKeyDown={(e) => e.key === "Enter" && !isTyping && handleSend()}
               placeholder="Ask your AI coach anything..."
               disabled={isTyping}
-              className="flex-1 px-4 py-3 rounded-2xl border border-border/50 bg-background text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-border/50 transition-all disabled:opacity-50 shadow-sm"
+              className="flex-1 bg-transparent px-2 py-3 text-base sm:text-lg text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:opacity-50"
             />
             <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleSend}
               disabled={isTyping || !input.trim()}
-              className="px-5 py-3 rounded-2xl text-sm font-medium text-background transition-opacity disabled:opacity-30 shadow-sm"
-              style={{ background: accentColor }}
+              className="w-12 h-12 flex items-center justify-center rounded-[20px] text-background shadow-md disabled:opacity-30 disabled:hover:scale-100 shrink-0 ml-2"
+              style={{ background: `linear-gradient(135deg, hsl(262,83%,58%), ${accentColor})` }}
             >
-              Send
+              ↑
             </motion.button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
