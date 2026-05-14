@@ -5,7 +5,6 @@ import TransitionOverlay from "@/components/ai/TransitionOverlay";
 import PersonaSelection from "@/components/ai/PersonaSelection";
 import MissionDashboard from "@/components/ai/MissionDashboard";
 import type { Persona } from "@/components/ai/PersonaSelection";
-import { coachBg } from "@/assets/personas";
 
 type Phase = "transition" | "persona" | "mission";
 
@@ -41,12 +40,7 @@ const Coach = () => {
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-[#fafafa]">
-      {/* Uploaded immersive background with light overlay */}
-      <div className="absolute inset-0">
-        <img src={coachBg} alt="" className="w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-        <div className="absolute inset-0 bg-white/75 backdrop-blur-[2px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-transparent to-white/80" />
-      </div>
+      {/* Background is provided sharply inside PersonaSelection / MissionDashboard */}
 
       {/* Transition overlay */}
       <TransitionOverlay
