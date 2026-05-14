@@ -254,9 +254,14 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                   <div className="flex gap-4 sm:gap-6 max-w-[95%] sm:max-w-[85%]">
                     {/* AI Avatar */}
                     <div className="shrink-0 pt-2">
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white border border-gray-100 shadow-sm flex items-center justify-center text-2xl sm:text-3xl z-10 relative">
-                        {persona.emoji}
-                      </div>
+                      <motion.div
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden shadow-md ring-2 ring-white relative"
+                        style={{ background: `linear-gradient(135deg, hsl(${persona.accentHsl} / 0.15), hsl(${persona.accentHsl} / 0.05))` }}
+                      >
+                        <img src={lumoAvatar} alt="Lumo AI" className="w-full h-full object-cover" />
+                      </motion.div>
                     </div>
                     
                     {/* AI Message Container */}
