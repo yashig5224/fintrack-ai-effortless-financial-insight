@@ -355,9 +355,9 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="flex gap-4 sm:gap-6 max-w-[80%]"
               >
-                <div className="shrink-0 pt-2 opacity-50">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-2xl sm:text-3xl grayscale">
-                    {persona.emoji}
+                <div className="shrink-0 pt-2">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden shadow-md ring-2 ring-white">
+                    <img src={lumoAvatar} alt="Lumo AI" className="w-full h-full object-cover" />
                   </div>
                 </div>
                 <div className="p-6 rounded-[24px] rounded-tl-xl bg-white/60 border border-white backdrop-blur-xl flex items-center gap-2 h-[72px]">
