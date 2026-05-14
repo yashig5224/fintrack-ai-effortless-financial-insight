@@ -398,27 +398,264 @@ const Dashboard = () => {
               </motion.div>
             )}
 
-            {activeTab !== "overview" && (
-              <motion.div 
-                key="other" 
-                initial={{ opacity: 0, filter: "blur(10px)" }} 
-                animate={{ opacity: 1, filter: "blur(0px)" }} 
-                exit={{ opacity: 0 }} 
-                className="flex flex-col items-center justify-center h-[60vh] text-center"
+            {activeTab === "transactions" && (
+              <motion.div
+                key="transactions"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="max-w-6xl mx-auto space-y-6"
               >
-                <div className="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center mb-6">
-                  <Sparkles className="w-8 h-8 text-gray-400" />
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div>
+                    <h1 className="font-display text-3xl font-bold text-gray-900 tracking-tight">Transactions</h1>
+                    <p className="text-gray-500 mt-1">AI-tagged activity across your accounts.</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white/70 rounded-2xl border border-white shadow-sm">
+                      <Search className="w-4 h-4 text-gray-400" />
+                      <input className="bg-transparent text-sm outline-none w-48 placeholder:text-gray-400" placeholder="Search…" />
+                    </div>
+                    <button className="px-4 py-2.5 bg-gray-900 text-white rounded-2xl text-sm font-medium hover:bg-gray-800 shadow-sm">+ Add</button>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-display font-bold text-gray-900 mb-2">Coming Soon</h2>
-                <p className="text-gray-500 max-w-sm">
-                  The {sidebarItems.find(i => i.id === activeTab)?.label} experience is being redesigned into a premium cinematic interface.
-                </p>
-                <button 
-                  onClick={() => setActiveTab("overview")}
-                  className="mt-8 px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
-                >
-                  Return to Overview
-                </button>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: "Income", value: "₹55,000", tone: "emerald" },
+                    { label: "Expenses", value: "₹27,940", tone: "rose" },
+                    { label: "Net Savings", value: "₹27,060", tone: "blue" },
+                    { label: "AI Tagged", value: "98%", tone: "purple" },
+                  ].map((s) => (
+                    <div key={s.label} className="glass-card bg-white/70 p-5 rounded-3xl border-white/50">
+                      <p className="text-xs uppercase tracking-widest font-bold text-gray-400">{s.label}</p>
+                      <p className="text-2xl font-display font-bold text-gray-900 mt-2">{s.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {["All", "Income", "Food", "Transport", "Shopping", "Bills", "Entertainment"].map((c, i) => (
+                    <button key={c} className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${i === 0 ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-600 border-gray-100 hover:border-gray-200"}`}>{c}</button>
+                  ))}
+                </div>
+
+                <div className="glass-card bg-white/70 p-2 sm:p-4 rounded-[28px] border-white/50">
+                  <div className="divide-y divide-gray-100">
+                    {[...transactions, ...transactions].map((tx, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className="flex items-center justify-between p-4 hover:bg-white/80 rounded-2xl transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-50 to-white flex items-center justify-center text-xl border border-gray-100">{tx.icon}</div>
+                          <div>
+                            <p className="font-medium text-gray-900">{tx.name}</p>
+                            <p className="text-xs text-gray-500">{tx.category} • {tx.date}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700">
+                            <Sparkles className="w-3 h-3" /> AI · 96%
+                          </span>
+                          <p className={`font-bold ${tx.amount > 0 ? "text-emerald-600" : "text-gray-900"}`}>
+                            {tx.amount > 0 ? "+" : ""}₹{Math.abs(tx.amount).toLocaleString()}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "goals" && (
+              <motion.div
+                key="goals"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="max-w-6xl mx-auto space-y-6"
+              >
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div>
+                    <h1 className="font-display text-3xl font-bold text-gray-900 tracking-tight">Your Goals</h1>
+                    <p className="text-gray-500 mt-1">Dream big. Save smart. Track every milestone.</p>
+                  </div>
+                  <button className="px-4 py-2.5 bg-gray-900 text-white rounded-2xl text-sm font-medium hover:bg-gray-800 shadow-sm w-max">+ New Goal</button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {[
+                    { name: "MacBook Fund", target: 150000, saved: 102000, icon: "💻", color: "from-blue-500 to-cyan-400" },
+                    { name: "Dubai Trip", target: 90000, saved: 32000, icon: "🏝️", color: "from-amber-500 to-pink-500" },
+                    { name: "Emergency Savings", target: 200000, saved: 178000, icon: "🛟", color: "from-emerald-500 to-teal-400" },
+                    { name: "SIP Growth", target: 500000, saved: 215000, icon: "📈", color: "from-violet-500 to-purple-500" },
+                    { name: "Bike Purchase", target: 180000, saved: 60000, icon: "🏍️", color: "from-rose-500 to-orange-400" },
+                    { name: "Wedding Fund", target: 800000, saved: 240000, icon: "💍", color: "from-pink-500 to-fuchsia-500" },
+                  ].map((g, i) => {
+                    const pct = Math.min(100, Math.round((g.saved / g.target) * 100));
+                    const r = 42;
+                    const C = 2 * Math.PI * r;
+                    return (
+                      <motion.div
+                        key={g.name}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.06 }}
+                        className="glass-card bg-white/80 p-6 rounded-[28px] border-white/50 relative overflow-hidden group"
+                      >
+                        <div className={`absolute -top-12 -right-12 w-40 h-40 rounded-full bg-gradient-to-br ${g.color} opacity-15 blur-2xl group-hover:opacity-30 transition-opacity`} />
+                        <div className="flex items-center gap-4">
+                          <div className="relative w-24 h-24 shrink-0">
+                            <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                              <circle cx="50" cy="50" r={r} stroke="#f1f5f9" strokeWidth="8" fill="none" />
+                              <motion.circle
+                                cx="50" cy="50" r={r}
+                                stroke="url(#grad)" strokeWidth="8" strokeLinecap="round" fill="none"
+                                strokeDasharray={C}
+                                initial={{ strokeDashoffset: C }}
+                                whileInView={{ strokeDashoffset: C - (C * pct) / 100 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 1.4, ease: "easeOut" }}
+                              />
+                              <defs>
+                                <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                                  <stop offset="0%" stopColor="#6366f1" />
+                                  <stop offset="100%" stopColor="#10b981" />
+                                </linearGradient>
+                              </defs>
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center text-2xl">{g.icon}</div>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-display font-bold text-gray-900">{g.name}</h4>
+                            <p className="text-xs text-gray-500 mt-1">₹{g.saved.toLocaleString()} of ₹{g.target.toLocaleString()}</p>
+                            <p className="text-2xl font-display font-bold text-gray-900 mt-2">{pct}%</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "reports" && (
+              <motion.div
+                key="reports"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="max-w-6xl mx-auto space-y-6"
+              >
+                <div>
+                  <h1 className="font-display text-3xl font-bold text-gray-900 tracking-tight">Reports & Insights</h1>
+                  <p className="text-gray-500 mt-1">AI-powered breakdown of your financial behavior.</p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2 glass-card bg-white/70 p-6 sm:p-8 rounded-[32px] border-white/50">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">Cashflow Trend</h3>
+                    <p className="text-sm text-gray-500 mb-6">Last 7 months</p>
+                    <div className="h-[280px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={areaData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="rIncome" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.35}/>
+                              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                            </linearGradient>
+                            <linearGradient id="rExpense" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                          <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} dy={10} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} tickFormatter={(v) => `₹${v / 1000}k`} />
+                          <Tooltip contentStyle={{ borderRadius: "16px", border: "none", boxShadow: "0 10px 40px -10px rgba(0,0,0,0.1)" }} formatter={(v: number) => [`₹${v.toLocaleString()}`, ""]} />
+                          <Area type="monotone" dataKey="income" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#rIncome)" />
+                          <Area type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={3} fillOpacity={1} fill="url(#rExpense)" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  <div className="glass-card bg-white/70 p-6 sm:p-8 rounded-[32px] border-white/50">
+                    <h3 className="text-lg font-bold text-gray-900 mb-6">Category Mix</h3>
+                    <div className="h-[220px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={categoryData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" strokeWidth={0} paddingAngle={4}>
+                            {categoryData.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="space-y-2 mt-4">
+                      {categoryData.map((c) => (
+                        <div key={c.name} className="flex justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full" style={{ background: c.color }} />
+                            <span className="text-gray-600">{c.name}</span>
+                          </div>
+                          <span className="font-medium text-gray-900">₹{c.value.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="glass-card bg-white/70 p-6 sm:p-8 rounded-[32px] border-white/50">
+                    <h3 className="text-lg font-bold text-gray-900 mb-6">Weekly Spend</h3>
+                    <div className="h-[220px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={[
+                          { d: "Mon", v: 1200 }, { d: "Tue", v: 800 }, { d: "Wed", v: 1600 },
+                          { d: "Thu", v: 940 }, { d: "Fri", v: 2100 }, { d: "Sat", v: 2800 }, { d: "Sun", v: 1500 },
+                        ]}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                          <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} />
+                          <Tooltip contentStyle={{ borderRadius: "16px", border: "none", boxShadow: "0 10px 40px -10px rgba(0,0,0,0.1)" }} />
+                          <Bar dataKey="v" radius={[8, 8, 0, 0]} fill="#6366f1" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {[
+                      { title: "Food spending up 18%", desc: "You spent 18% more on food this month than last.", tone: "rose" },
+                      { title: "Saved ₹5,400 more", desc: "You're outperforming your previous month savings.", tone: "emerald" },
+                      { title: "Improving consistently", desc: "5-week positive savings streak. Keep going!", tone: "blue" },
+                    ].map((it, i) => (
+                      <motion.div
+                        key={it.title}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.08 }}
+                        className="glass-card bg-white/80 p-5 rounded-3xl border-white/50 flex gap-4"
+                      >
+                        <div className={`w-10 h-10 rounded-xl bg-${it.tone}-50 flex items-center justify-center`}>
+                          <Sparkles className={`w-5 h-5 text-${it.tone}-500`} />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900">{it.title}</h4>
+                          <p className="text-sm text-gray-500 mt-1">{it.desc}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
