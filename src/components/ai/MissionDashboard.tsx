@@ -54,13 +54,24 @@ const aiResponses: Record<string, { text: string; insights: Insight[] }> = {
   },
 };
 
-const quickActions = [
+const defaultActions = [
   "Analyze my spending",
   "Create a budget",
   "Detect waste",
   "Save more money",
-  "Goal planning"
+  "Goal planning",
 ];
+
+const personaPrompts: Record<string, string[]> = {
+  student:    ["Track my pocket money", "Find unused subscriptions", "Save ₹500 this week", "Best apps for students"],
+  salary:     ["Build a salary budget", "Automate my savings", "Optimize EMIs", "Plan an emergency fund"],
+  investor:   ["Review my portfolio", "Suggest a SIP", "Risk check my stocks", "Rebalance ideas"],
+  hustler:    ["Estimate my taxes", "Track multiple incomes", "Forecast monthly revenue", "Cashflow tips"],
+  minimalist: ["Simplify my budget", "Cut 3 expenses", "Essentials only plan", "Quiet money habits"],
+  family:     ["Plan for kids' education", "Family insurance check", "Shared monthly budget", "Emergency fund target"],
+  luxury:     ["Smart luxury swaps", "Travel budget planner", "Wealth + lifestyle balance", "Reward optimization"],
+  crypto:     ["Crypto allocation tips", "DeFi risk check", "Stablecoin strategy", "Tax on crypto gains"],
+};
 
 const CHART_COLORS = [
   "hsl(38, 92%, 50%)",
@@ -150,6 +161,8 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
     setInput("");
   };
 
+  const quickActions = personaPrompts[persona.id] ?? defaultActions;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -238,7 +251,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
       </motion.div>
 
       {/* ═══ Main Chat Area ═══ */}
-      <div className="flex-1 overflow-y-auto relative z-10 scrollbar-none pb-40">
+      <div className="flex-1 overflow-y-auto relative z-10 scrollbar-none pb-56">
         <div className="max-w-4xl mx-auto px-4 sm:px-8 space-y-10">
           <AnimatePresence mode="popLayout">
             {messages.map((msg) => (
@@ -390,7 +403,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
             {quickActions.map((action, i) => (
               <button
                 key={i}
-                onClick={() => { setInput(action); setTimeout(() => handleSend(), 100); }}
+                onClick={() => sendMessage(action)}
                 className="shrink-0 px-4 py-2.5 rounded-xl bg-white border border-gray-100 shadow-sm text-sm font-medium text-gray-700 hover:text-gray-900 hover:border-gray-200 hover:shadow-md transition-all flex items-center gap-2"
               >
                 <Sparkles className="w-3.5 h-3.5 text-blue-500" /> {action}
