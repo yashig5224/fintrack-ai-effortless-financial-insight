@@ -157,10 +157,12 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
       transition={{ duration: 0.4 }}
       className="flex flex-col h-[100dvh] w-screen relative overflow-hidden bg-[#fafafa]"
     >
-      {/* Cinematic Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50/60 via-transparent to-transparent pointer-events-none" />
-      <div className="absolute top-[20%] left-[-10%] w-[800px] h-[800px] rounded-full bg-purple-50/40 blur-[120px] pointer-events-none mix-blend-multiply" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-blue-50/40 blur-[100px] pointer-events-none mix-blend-multiply" />
+      {/* Uploaded immersive background */}
+      <div className="absolute inset-0 -z-0 pointer-events-none">
+        <img src={coachBg} alt="" className="w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+        <div className="absolute inset-0 bg-white/85 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-white/90" />
+      </div>
 
       {/* Floating particles */}
       {Array.from({ length: 15 }).map((_, i) => (
