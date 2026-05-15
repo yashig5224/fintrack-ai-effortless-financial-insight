@@ -396,7 +396,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.6, type: "spring" }}
-        className="absolute bottom-0 left-0 w-full z-30 pb-6 pt-10 px-4 sm:px-8 bg-gradient-to-t from-[#fafafa] via-[#fafafa]/80 to-transparent"
+        className="shrink-0 relative z-30 pb-4 pt-4 px-4 sm:px-8 bg-gradient-to-t from-[#fafafa] via-[#fafafa]/90 to-transparent"
       >
         <div className="max-w-4xl mx-auto space-y-4">
           {/* Quick Actions (Scrollable) */}
