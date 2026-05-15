@@ -122,11 +122,12 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const nextId = useRef(1);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = messagesContainerRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   };
 
   useEffect(scrollToBottom, [messages, isTyping]);
@@ -168,7 +169,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="flex flex-col h-[100dvh] w-screen relative overflow-hidden bg-[#fafafa]"
+      className="flex flex-col h-full w-full absolute inset-0 overflow-hidden bg-[#fafafa]"
     >
       {/* Uploaded immersive background */}
       <div className="absolute inset-0 -z-0 pointer-events-none">
@@ -182,7 +183,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
         <motion.div
           key={`bg-particle-${i}`}
           animate={{ 
-            y: ["100vh", "-10vh"],
+            y: ["100%", "-10%"],
             x: [0, Math.sin(i) * 50, 0],
             opacity: [0, 0.4, 0],
             rotate: [0, 360]
@@ -251,7 +252,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
       </motion.div>
 
       {/* ═══ Main Chat Area ═══ */}
-      <div className="flex-1 overflow-y-auto relative z-10 scrollbar-none pb-56">
+      <div ref={messagesContainerRef} className="flex-1 min-h-0 overflow-y-auto relative z-10 scrollbar-none pt-2 pb-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-8 space-y-10">
           <AnimatePresence mode="popLayout">
             {messages.map((msg) => (
@@ -386,7 +387,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
               </motion.div>
             )}
           </AnimatePresence>
-          <div ref={messagesEndRef} className="h-4" />
+          <div className="h-2" />
         </div>
       </div>
 
@@ -395,7 +396,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.6, type: "spring" }}
-        className="absolute bottom-0 left-0 w-full z-30 pb-6 pt-10 px-4 sm:px-8 bg-gradient-to-t from-[#fafafa] via-[#fafafa]/80 to-transparent"
+        className="shrink-0 relative z-30 pb-4 pt-4 px-4 sm:px-8 bg-gradient-to-t from-[#fafafa] via-[#fafafa]/90 to-transparent"
       >
         <div className="max-w-4xl mx-auto space-y-4">
           {/* Quick Actions (Scrollable) */}
