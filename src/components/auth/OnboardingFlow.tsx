@@ -6,26 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-const PERSONAS = [
-  { id: "student", name: "Student Saver", emoji: "🎒" },
-  { id: "salary", name: "Salary Warrior", emoji: "💼" },
-  { id: "investor", name: "Smart Investor", emoji: "📈" },
-  { id: "hustler", name: "Side Hustler", emoji: "🚀" },
-  { id: "minimalist", name: "Minimalist", emoji: "🪴" },
-  { id: "family", name: "Family Guardian", emoji: "🏡" },
-  { id: "luxury", name: "Luxury Dreamer", emoji: "✨" },
-  { id: "crypto", name: "Crypto Explorer", emoji: "🪙" },
-];
-
 const QUESTIONS: Array<{
-  id: string; title: string; subtitle: string; icon: any; type: "text" | "options" | "number" | "personas"; placeholder?: string; options?: string[];
+  id: string; title: string; subtitle: string; icon: any; type: "text" | "options" | "number"; placeholder?: string; options?: string[];
 }> = [
   { id: "name", title: "What should we call you?", subtitle: "Let's make this personal.", icon: User, type: "text", placeholder: "Your preferred name" },
   { id: "profession", title: "What's your primary profession?", subtitle: "Helps us tailor income strategies.", icon: Briefcase, type: "options", options: ["Student", "Employed", "Self-Employed", "Freelancer", "Other"] },
   { id: "monthly_income", title: "What's your monthly income?", subtitle: "Bank-grade encrypted. Used to personalize budgets.", icon: Wallet, type: "number", placeholder: "e.g. 50000" },
   { id: "habit", title: "What's your biggest spending habit?", subtitle: "Be honest — your AI coach won't judge.", icon: CreditCard, type: "options", options: ["Food & Dining", "Shopping", "Tech & Gadgets", "Travel", "Subscriptions"] },
   { id: "primary_goal", title: "What's your top financial goal?", subtitle: "We'll build a roadmap.", icon: Target, type: "options", options: ["Emergency Fund", "Invest for Wealth", "Pay Off Debt", "Big Purchase", "Better Tracking"] },
-  { id: "persona", title: "Choose your AI persona", subtitle: "Your Lumo AI will adapt to this archetype.", icon: Sparkles, type: "personas" },
 ];
 
 export default function OnboardingFlow({ onComplete }: { onComplete?: () => void }) {
@@ -45,7 +33,7 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
     const { error } = await supabase.from("profiles").update({
       full_name: final.name || null,
       monthly_income: final.monthly_income ? Number(final.monthly_income) : 0,
-      selected_persona: final.persona || "salary",
+      selected_persona: null,
       primary_goal: final.primary_goal || null,
       onboarding_data: final,
       onboarding_completed: true,
@@ -129,16 +117,6 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
               </div>
             )}
 
-            {currentQ.type === "personas" && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {PERSONAS.map((p, i) => (
-                  <motion.button key={p.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} onClick={() => handleNext(p.id)} className="p-5 rounded-[24px] bg-white border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-gray-300 transition-all text-center">
-                    <div className="text-3xl mb-2">{p.emoji}</div>
-                    <div className="text-xs font-semibold text-gray-900 leading-tight">{p.name}</div>
-                  </motion.button>
-                ))}
-              </div>
-            )}
           </motion.div>
         </AnimatePresence>
       </div>
