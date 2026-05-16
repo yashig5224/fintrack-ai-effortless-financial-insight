@@ -378,8 +378,8 @@ const Dashboard = () => {
                           className="flex items-center justify-between p-3 hover:bg-white rounded-2xl transition-colors cursor-pointer"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-xl border border-gray-100">
-                              {tx.icon}
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-white to-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
+                              <img src={getCategoryIcon(tx.category)} alt="" className="w-10 h-10 object-contain" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900">{tx.name}</p>
@@ -453,7 +453,9 @@ const Dashboard = () => {
                         className="flex items-center justify-between p-4 hover:bg-white/80 rounded-2xl transition-colors"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-50 to-white flex items-center justify-center text-xl border border-gray-100">{tx.icon}</div>
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-white to-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
+                            <img src={getCategoryIcon(tx.category)} alt="" className="w-10 h-10 object-contain" />
+                          </div>
                           <div>
                             <p className="font-medium text-gray-900">{tx.name}</p>
                             <p className="text-xs text-gray-500">{tx.category} • {tx.date}</p>
