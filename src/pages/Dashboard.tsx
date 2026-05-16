@@ -5,7 +5,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar,
 } from "recharts";
-import { Sparkles, Target, Wallet, TrendingUp, CreditCard, ChevronRight, LayoutDashboard, Search, Bell, History, Flag, BookOpen, MessageSquare } from "lucide-react";
+import { Sparkles, Target, Wallet, TrendingUp, CreditCard, ChevronRight, LayoutDashboard, Search, Bell, MessageSquare } from "lucide-react";
+import { getCategoryIcon, NAV_ICONS } from "@/assets/icons";
 
 // Mock Data
 const areaData = [
@@ -19,17 +20,17 @@ const areaData = [
 ];
 
 const categoryData = [
-  { name: "Food", value: 8240, color: "hsl(217, 91%, 60%)" }, // Blue
-  { name: "Transport", value: 4500, color: "hsl(262, 83%, 58%)" }, // Purple
-  { name: "Shopping", value: 6200, color: "hsl(330, 81%, 60%)" }, // Pink
-  { name: "Bills", value: 5800, color: "hsl(152, 69%, 41%)" }, // Green
+  { name: "Food", value: 8240, color: "hsl(217, 91%, 60%)" },
+  { name: "Transport", value: 4500, color: "hsl(262, 83%, 58%)" },
+  { name: "Shopping", value: 6200, color: "hsl(330, 81%, 60%)" },
+  { name: "Bills", value: 5800, color: "hsl(152, 69%, 41%)" },
 ];
 
 const transactions = [
-  { id: 1, name: "Uber Ride", category: "Transport", amount: -340, date: "Today, 2:30 PM", icon: "🚗" },
-  { id: 2, name: "Salary Credit", category: "Income", amount: 55000, date: "Yesterday", icon: "💼" },
-  { id: 3, name: "Swiggy Order", category: "Food", amount: -520, date: "Yesterday", icon: "🍔" },
-  { id: 4, name: "Netflix Subscription", category: "Entertainment", amount: -649, date: "2 days ago", icon: "🎬" },
+  { id: 1, name: "Uber Ride", category: "Transport", amount: -340, date: "Today, 2:30 PM" },
+  { id: 2, name: "Salary Credit", category: "Salary", amount: 55000, date: "Yesterday" },
+  { id: 3, name: "Swiggy Order", category: "Food", amount: -520, date: "Yesterday" },
+  { id: 4, name: "Netflix Subscription", category: "Entertainment", amount: -649, date: "2 days ago" },
 ];
 
 const goals = [
@@ -45,11 +46,11 @@ const aiInsights = [
 ];
 
 const sidebarItems = [
-  { icon: LayoutDashboard, label: "Overview", id: "overview" },
-  { icon: History, label: "Transactions", id: "transactions" },
-  { icon: Flag, label: "Goals", id: "goals" },
-  { icon: BookOpen, label: "Reports", id: "reports" },
-  { icon: MessageSquare, label: "AI Coach", id: "chat" },
+  { img: NAV_ICONS.overview, label: "Overview", id: "overview" },
+  { img: NAV_ICONS.transactions, label: "Transactions", id: "transactions" },
+  { img: NAV_ICONS.goals, label: "Goals", id: "goals" },
+  { img: NAV_ICONS.reports, label: "Reports", id: "reports" },
+  { img: null, icon: MessageSquare, label: "AI Coach", id: "chat" },
 ];
 
 const Dashboard = () => {
@@ -103,22 +104,22 @@ const Dashboard = () => {
                 key={item.id}
                 onClick={() => handleTabClick(item.id)}
                 className={`w-full flex items-center gap-3 rounded-2xl transition-all duration-300 relative group overflow-hidden ${
-                  sidebarCollapsed ? "justify-center p-3" : "px-4 py-3.5"
+                  sidebarCollapsed ? "justify-center p-2" : "px-3 py-2.5"
                 } ${
                   isActive
-                    ? "text-white shadow-md shadow-gray-900/10"
+                    ? "bg-gradient-to-r from-purple-100 via-blue-50 to-cyan-50 text-gray-900 shadow-sm"
                     : "text-gray-500 hover:text-gray-900 hover:bg-gray-100/80"
                 }`}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-gray-900 rounded-2xl -z-10"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
+                {item.img ? (
+                  <img src={item.img} alt="" className="w-9 h-9 object-contain shrink-0" />
+                ) : (
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center shrink-0">
+                    <item.icon className="w-4 h-4 text-blue-700" />
+                  </div>
                 )}
-                <item.icon className={`w-5 h-5 z-10 ${isActive ? "text-white" : "group-hover:scale-110 transition-transform"}`} />
                 {!sidebarCollapsed && <span className="text-sm font-medium z-10">{item.label}</span>}
+                {isActive && !sidebarCollapsed && <span className="absolute right-3 w-1.5 h-1.5 rounded-full bg-cyan-500" />}
               </button>
             );
           })}
@@ -377,8 +378,8 @@ const Dashboard = () => {
                           className="flex items-center justify-between p-3 hover:bg-white rounded-2xl transition-colors cursor-pointer"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-xl border border-gray-100">
-                              {tx.icon}
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-white to-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
+                              <img src={getCategoryIcon(tx.category)} alt="" className="w-10 h-10 object-contain" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900">{tx.name}</p>
@@ -452,7 +453,9 @@ const Dashboard = () => {
                         className="flex items-center justify-between p-4 hover:bg-white/80 rounded-2xl transition-colors"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-50 to-white flex items-center justify-center text-xl border border-gray-100">{tx.icon}</div>
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-white to-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
+                            <img src={getCategoryIcon(tx.category)} alt="" className="w-10 h-10 object-contain" />
+                          </div>
                           <div>
                             <p className="font-medium text-gray-900">{tx.name}</p>
                             <p className="text-xs text-gray-500">{tx.category} • {tx.date}</p>
