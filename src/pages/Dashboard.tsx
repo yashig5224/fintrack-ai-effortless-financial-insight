@@ -680,7 +680,11 @@ const Dashboard = () => {
               >
                 <div className={`relative ${isActive ? "scale-110" : ""}`}>
                   {isActive && <div className="absolute inset-0 bg-gray-100 rounded-full scale-150 -z-10" />}
-                  <item.icon className="w-5 h-5" />
+                  {item.img ? (
+                    <img src={item.img} alt="" className="w-7 h-7 object-contain" />
+                  ) : item.icon ? (
+                    <item.icon className="w-5 h-5" />
+                  ) : null}
                 </div>
                 <span className="text-[10px] font-medium mt-1">{item.label}</span>
               </button>
