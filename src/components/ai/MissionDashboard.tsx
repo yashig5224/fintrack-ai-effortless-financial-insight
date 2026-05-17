@@ -22,36 +22,134 @@ interface Insight {
   chartData?: { name: string; value: number }[];
 }
 
-const aiResponses: Record<string, { text: string; insights: Insight[] }> = {
-  "Analyze my spending": {
-    text: "I've analyzed your recent transactions. You're doing great overall, but dining out is slightly above your usual trend.",
-    insights: [
-      { label: "Saved this week", value: "₹2,400", change: "+12% vs last week", positive: true },
-      { label: "Food spending", value: "₹4,800", change: "22% above budget", positive: false, chartData: [{ name: "Budget", value: 4000 }, { name: "Spent", value: 4800 }] },
-    ],
+// Persona-aware response library. Keyword-matched against the user message.
+type Reply = { text: string; insights: Insight[] };
+
+const baseLibrary: { keys: string[]; reply: Reply }[] = [
+  {
+    keys: ["spend", "spending", "analyze", "expenses"],
+    reply: {
+      text: "I scanned your last 30 days. Overall you're trending well — but dining out is creeping above your usual baseline. A small 10% trim would compound nicely.",
+      insights: [
+        { label: "Saved this week", value: "₹2,400", change: "+12% vs last week", positive: true },
+        { label: "Food spending", value: "₹4,800", change: "22% above budget", positive: false, chartData: [{ name: "Budget", value: 4000 }, { name: "Spent", value: 4800 }] },
+      ],
+    },
   },
-  "Create a budget": {
-    text: "Let's build a smart budget. Based on your income, here's an optimized 50/30/20 allocation for this month.",
-    insights: [
-      { label: "Needs", value: "50%", change: "₹27,500" },
-      { label: "Wants", value: "30%", change: "₹16,500" },
-      { label: "Savings", value: "20%", change: "₹11,000", positive: true, chartData: [{ name: "Needs", value: 50 }, { name: "Wants", value: 30 }, { name: "Savings", value: 20 }] },
-    ],
+  {
+    keys: ["budget", "allocation", "50/30/20", "monthly"],
+    reply: {
+      text: "Let's structure a balanced budget using the 50/30/20 rule. Based on your income, here's a clean monthly allocation.",
+      insights: [
+        { label: "Needs", value: "50%", change: "₹27,500" },
+        { label: "Wants", value: "30%", change: "₹16,500" },
+        { label: "Savings", value: "20%", change: "₹11,000", positive: true, chartData: [{ name: "Needs", value: 50 }, { name: "Wants", value: 30 }, { name: "Savings", value: 20 }] },
+      ],
+    },
   },
-  "Detect waste": {
-    text: "I found a few subscriptions you haven't used recently. Cutting these will save you a good amount annually.",
-    insights: [
-      { label: "Active Subs", value: "8", change: "₹2,840/mo" },
-      { label: "Unused Subs", value: "3", change: "Save ₹1,150/mo", positive: true, chartData: [{ name: "Active", value: 5 }, { name: "Unused", value: 3 }] },
-    ],
+  {
+    keys: ["waste", "subscription", "unused", "cancel"],
+    reply: {
+      text: "I found 3 subscriptions with no usage in the past 30 days. Cancelling these would save you ₹13,800 annually.",
+      insights: [
+        { label: "Active Subs", value: "8", change: "₹2,840/mo" },
+        { label: "Unused Subs", value: "3", change: "Save ₹1,150/mo", positive: true, chartData: [{ name: "Active", value: 5 }, { name: "Unused", value: 3 }] },
+      ],
+    },
   },
-  "Goal planning": {
-    text: "Your goals are looking solid. You're on track to hit your Emergency Fund target early!",
-    insights: [
-      { label: "Goal progress", value: "68%", change: "Emergency Fund", positive: true, chartData: [{ name: "Done", value: 68 }, { name: "Left", value: 32 }] },
-      { label: "Est. Completion", value: "Aug 2026", change: "2 months early!", positive: true },
-    ],
+  {
+    keys: ["goal", "save more", "emergency", "target"],
+    reply: {
+      text: "Your goals are on track. At this pace you'll hit your Emergency Fund 2 months early. Want me to redirect ₹2,000/mo to your next goal?",
+      insights: [
+        { label: "Goal progress", value: "68%", change: "Emergency Fund", positive: true, chartData: [{ name: "Done", value: 68 }, { name: "Left", value: 32 }] },
+        { label: "Est. Completion", value: "Aug 2026", change: "2 months early!", positive: true },
+      ],
+    },
   },
+  {
+    keys: ["invest", "sip", "portfolio", "stock", "mutual"],
+    reply: {
+      text: "Your portfolio leans 70% equity / 20% debt / 10% cash. For your risk profile, a small rebalance toward index funds will smooth volatility.",
+      insights: [
+        { label: "Equity", value: "70%", change: "+3% MoM", positive: true, chartData: [{ name: "Eq", value: 70 }, { name: "Debt", value: 20 }, { name: "Cash", value: 10 }] },
+        { label: "Suggested SIP", value: "₹8,000", change: "Index fund", positive: true },
+      ],
+    },
+  },
+  {
+    keys: ["tax", "income tax", "deduction"],
+    reply: {
+      text: "You can still claim ₹62,000 in deductions this year via 80C + NPS. Want a step-by-step filing checklist?",
+      insights: [
+        { label: "80C used", value: "₹88,000", change: "of ₹1.5L" },
+        { label: "Potential save", value: "₹19,400", change: "If maxed", positive: true },
+      ],
+    },
+  },
+];
+
+const personaLibrary: Record<string, { keys: string[]; reply: Reply }[]> = {
+  student: [
+    { keys: ["college", "hostel", "pocket"], reply: { text: "Here's a lean student plan: keep mess + essentials under ₹4,500, cap outings at ₹1,500, and stash ₹500 weekly. Tiny, but it compounds.", insights: [
+      { label: "Weekly save target", value: "₹500", change: "Doable", positive: true },
+      { label: "Monthly buffer", value: "₹2,000", change: "Auto-transfer", positive: true, chartData: [{ name: "Saved", value: 2000 }, { name: "Spent", value: 4500 }] },
+    ] } },
+    { keys: ["food", "mess", "eating"], reply: { text: "Food is your biggest swing category. Try a 5-day mess plan + 2 outings cap. You'd save around ₹1,800/mo.", insights: [
+      { label: "Food now", value: "₹6,300", change: "Above target", positive: false, chartData: [{ name: "Now", value: 6300 }, { name: "Target", value: 4500 }] },
+    ] } },
+  ],
+  salary: [
+    { keys: ["salary", "optimize", "paycheck"], reply: { text: "Automate the moment salary lands: 20% to investments, 10% to emergency, then spend the rest guilt-free.", insights: [
+      { label: "Auto-save", value: "20%", change: "₹11,000/mo", positive: true },
+      { label: "Emergency", value: "10%", change: "₹5,500/mo", positive: true, chartData: [{ name: "Invest", value: 20 }, { name: "Emerg", value: 10 }, { name: "Live", value: 70 }] },
+    ] } },
+    { keys: ["emi", "loan", "debt"], reply: { text: "Your EMIs eat 28% of take-home. Refinancing your personal loan could drop it to 22% — frees up ₹3,300/mo.", insights: [
+      { label: "EMI share", value: "28%", change: "Slightly high", positive: false },
+      { label: "After refi", value: "22%", change: "Free ₹3,300", positive: true },
+    ] } },
+  ],
+  investor: [
+    { keys: ["risk", "rebalance", "allocation"], reply: { text: "Risk-adjusted, you're slightly overweight on small caps. Trim 5%, rotate into large-cap index, and your Sharpe ratio improves.", insights: [
+      { label: "Sharpe", value: "1.1", change: "→ 1.3 projected", positive: true, chartData: [{ name: "Lg", value: 45 }, { name: "Mid", value: 25 }, { name: "Sm", value: 30 }] },
+    ] } },
+  ],
+  hustler: [
+    { keys: ["freelance", "client", "revenue", "income"], reply: { text: "Across your 3 income streams, freelance is volatile. Set aside 30% of every payout for taxes + lean months.", insights: [
+      { label: "Streams", value: "3", change: "₹84k avg/mo", positive: true, chartData: [{ name: "Free", value: 50 }, { name: "Side", value: 30 }, { name: "Affil", value: 20 }] },
+      { label: "Tax buffer", value: "30%", change: "Auto-allocate", positive: true },
+    ] } },
+  ],
+  minimalist: [
+    { keys: ["simplify", "essentials", "cut"], reply: { text: "Pared down: 3 categories cover 92% of your needs. Everything else is optional — and that's freedom.", insights: [
+      { label: "Core spend", value: "₹18,400", change: "92% of life", positive: true, chartData: [{ name: "Core", value: 92 }, { name: "Extra", value: 8 }] },
+    ] } },
+  ],
+  family: [
+    { keys: ["kid", "child", "education", "school"], reply: { text: "For a ₹15L education corpus in 12 years, start a ₹6,200/mo SIP at 11% expected returns. Locked in, stress-free.", insights: [
+      { label: "Monthly SIP", value: "₹6,200", change: "12-yr horizon", positive: true },
+      { label: "Target", value: "₹15L", change: "Education", positive: true, chartData: [{ name: "Need", value: 100 }] },
+    ] } },
+  ],
+  luxury: [
+    { keys: ["travel", "luxury", "lifestyle"], reply: { text: "Your luxury budget is healthy. One smart swap: book international trips 90 days out — same experience, ~22% cheaper.", insights: [
+      { label: "Smart swap", value: "22%", change: "Per trip", positive: true },
+    ] } },
+  ],
+  crypto: [
+    { keys: ["crypto", "btc", "eth", "defi", "stable"], reply: { text: "Your crypto allocation is 18% of net worth — at the upper edge. Consider rotating 5% into stablecoin yield to cushion volatility.", insights: [
+      { label: "Crypto share", value: "18%", change: "High vol", positive: false, chartData: [{ name: "BTC", value: 50 }, { name: "ETH", value: 30 }, { name: "Alt", value: 20 }] },
+    ] } },
+  ],
+};
+
+const findReply = (msg: string, personaId: string): Reply | null => {
+  const lower = msg.toLowerCase();
+  const candidates = [...(personaLibrary[personaId] ?? []), ...baseLibrary];
+  for (const c of candidates) {
+    if (c.keys.some((k) => lower.includes(k))) return c.reply;
+  }
+  return null;
 };
 
 const defaultActions = [
@@ -63,13 +161,13 @@ const defaultActions = [
 ];
 
 const personaPrompts: Record<string, string[]> = {
-  student:    ["Track my pocket money", "Find unused subscriptions", "Save ₹500 this week", "Best apps for students"],
-  salary:     ["Build a salary budget", "Automate my savings", "Optimize EMIs", "Plan an emergency fund"],
-  investor:   ["Review my portfolio", "Suggest a SIP", "Risk check my stocks", "Rebalance ideas"],
-  hustler:    ["Estimate my taxes", "Track multiple incomes", "Forecast monthly revenue", "Cashflow tips"],
-  minimalist: ["Simplify my budget", "Cut 3 expenses", "Essentials only plan", "Quiet money habits"],
+  student:    ["Create my student budget", "Reduce food expenses", "Track hostel spending", "Save ₹500 this week"],
+  salary:     ["Optimize my salary", "Automate my savings", "Plan an emergency fund", "Lower my EMIs"],
+  investor:   ["Review my portfolio", "Suggest a SIP", "Risk-check my stocks", "Rebalance ideas"],
+  hustler:    ["Track freelance income", "Estimate my taxes", "Forecast monthly revenue", "Cashflow tips"],
+  minimalist: ["Simplify my budget", "Cut 3 expenses", "Essentials-only plan", "Quiet money habits"],
   family:     ["Plan for kids' education", "Family insurance check", "Shared monthly budget", "Emergency fund target"],
-  luxury:     ["Smart luxury swaps", "Travel budget planner", "Wealth + lifestyle balance", "Reward optimization"],
+  luxury:     ["Smart luxury swaps", "Travel budget planner", "Reward optimization", "Wealth + lifestyle balance"],
   crypto:     ["Crypto allocation tips", "DeFi risk check", "Stablecoin strategy", "Tax on crypto gains"],
 };
 
