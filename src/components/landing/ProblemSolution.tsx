@@ -1,128 +1,86 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { Link } from "react-router-dom";
+import { AlertTriangle, Search, Sparkles } from "lucide-react";
 
-const benefits = [
-  {
-    problem: "Overspending",
-    solution: "Smart alerts that warn you before you exceed limits.",
-    icon: "🔔",
-  },
-  {
-    problem: "Forgot subscriptions",
-    solution: "Auto-detect recurring charges you no longer need.",
-    icon: "🔍",
-  },
-  {
-    problem: "No clarity",
-    solution: "Visual insights that make your finances crystal clear.",
-    icon: "✨",
-  },
+const items = [
+  { problem: "Overspending", solution: "Smart alerts catch you before you cross the line.", icon: AlertTriangle, tint: "0,80%,60%" },
+  { problem: "Forgotten subscriptions", solution: "Auto-detect recurring drains on your wallet.", icon: Search, tint: "260,80%,62%" },
+  { problem: "No clarity", solution: "AI insights turn raw data into clear, beautiful stories.", icon: Sparkles, tint: "220,90%,60%" },
 ];
 
 const ProblemSolution = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-
-  // Parallax layers
-  const bgY = useTransform(scrollYProgress, [0, 1], [0, -80]);
-  const midY = useTransform(scrollYProgress, [0, 1], [0, -40]);
-  const headlineOpacity = useTransform(scrollYProgress, [0.1, 0.3], [0, 1]);
-  const headlineY = useTransform(scrollYProgress, [0.1, 0.3], [60, 0]);
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const midY = useTransform(scrollYProgress, [0, 1], [0, -60]);
+  const titleY = useTransform(scrollYProgress, [0, 0.5], [80, -20]);
 
   return (
-    <section
-      ref={containerRef}
-      className="relative min-h-screen overflow-hidden bg-background"
-    >
-      {/* Background parallax layer */}
+    <section ref={ref} className="relative min-h-screen py-24 md:py-32 overflow-hidden">
+      {/* Parallax background */}
       <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none">
-        {/* Soft gradient sky */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(220,60%,97%)] via-background to-background" />
-        {/* Floating shapes */}
-        <div className="absolute top-[15%] left-[8%] w-16 h-16 rounded-2xl bg-[hsl(217,91%,60%/0.08)] rotate-12" />
-        <div className="absolute top-[25%] right-[12%] w-20 h-20 rounded-full bg-[hsl(152,69%,41%/0.06)]" />
-        <div className="absolute bottom-[30%] left-[15%] w-12 h-12 rounded-full bg-[hsl(38,92%,50%/0.07)]" />
-        <div className="absolute top-[40%] right-[25%] w-8 h-8 rounded-xl bg-[hsl(262,83%,58%/0.06)] rotate-45" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(220,100%,98%)] via-white to-[hsl(280,100%,98%)]" />
+        <div className="absolute top-[10%] left-[8%] w-32 h-32 rounded-3xl bg-[hsl(220,100%,90%,0.5)] rotate-12 blur-sm" />
+        <div className="absolute top-[40%] right-[10%] w-40 h-40 rounded-full bg-[hsl(280,80%,92%,0.5)] blur-sm" />
+        <div className="absolute bottom-[15%] left-[15%] w-28 h-28 rounded-2xl bg-[hsl(150,80%,90%,0.5)] -rotate-12 blur-sm" />
       </motion.div>
-
-      {/* Mid parallax layer — larger decorative elements */}
       <motion.div style={{ y: midY }} className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[20%] right-[5%] w-32 h-32 rounded-full bg-[hsl(330,81%,60%/0.04)] blur-xl" />
-        <div className="absolute bottom-[20%] left-[5%] w-40 h-40 rounded-full bg-[hsl(217,91%,60%/0.05)] blur-xl" />
+        {/* Floating expense cards */}
+        {["-₹450", "-₹2,100", "-₹89", "-₹1,250"].map((amt, i) => (
+          <motion.div
+            key={i}
+            animate={{ y: [0, -15, 0] }}
+            transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute text-xs font-semibold px-3 py-1.5 rounded-full bg-white/70 backdrop-blur-md border border-white/90 text-[hsl(0,70%,50%)] shadow-sm"
+            style={{
+              top: `${15 + i * 20}%`,
+              left: `${i % 2 === 0 ? 5 + i * 3 : 75 - i * 3}%`,
+            }}
+          >
+            {amt}
+          </motion.div>
+        ))}
       </motion.div>
 
-      {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-24 md:py-32">
-        {/* Headline */}
-        <motion.div
-          style={{ opacity: headlineOpacity, y: headlineY }}
-          className="text-center mb-16 md:mb-20"
-        >
-          <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-foreground tracking-tight">
-            Stop losing money.
+      <div className="relative z-10 max-w-4xl mx-auto px-5 sm:px-6">
+        <motion.div style={{ y: titleY }} className="text-center mb-14">
+          <p className="text-xs tracking-[0.25em] uppercase text-foreground/55 mb-3 font-medium">✦ The Problem</p>
+          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.03em]">
+            Stop losing money to{" "}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[hsl(0,80%,55%)] to-[hsl(330,80%,60%)]">
+              invisible leaks
+            </span>.
           </h2>
-          <p className="mt-5 text-muted-foreground text-lg max-w-md mx-auto leading-relaxed">
-            Most people don't know where it disappears. We show you.
+          <p className="mt-4 text-foreground/65 max-w-md mx-auto">
+            Most people don't know where it disappears. Lumo shows you exactly where — and helps you fix it.
           </p>
         </motion.div>
 
-        {/* Benefit cards */}
-        <div className="max-w-3xl w-full space-y-5 mb-16 md:mb-20">
-          {benefits.map((item, i) => (
-            <motion.div
-              key={item.problem}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{
-                duration: 0.6,
-                delay: i * 0.12,
-                ease: [0.25, 0.46, 0.45, 0.94],
-              }}
-              className="relative"
-            >
-              <div className="bg-background/80 backdrop-blur-sm border border-border/60 rounded-2xl p-7 md:p-8 flex flex-col md:flex-row md:items-center gap-4 md:gap-8 shadow-sm hover:shadow-md transition-shadow duration-500">
+        <div className="space-y-4">
+          {items.map((it, i) => {
+            const Icon = it.icon;
+            return (
+              <motion.div
+                key={it.problem}
+                initial={{ opacity: 0, x: i % 2 === 0 ? -40 : 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="relative rounded-3xl p-6 md:p-7 bg-white/80 backdrop-blur-xl border border-white/90 shadow-[0_10px_40px_-15px_rgba(120,90,220,0.2)] flex flex-col md:flex-row md:items-center gap-4 md:gap-6 overflow-hidden"
+              >
+                <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl" style={{ background: `hsl(${it.tint},0.2)` }} />
                 <div className="flex items-center gap-4 shrink-0">
-                  <span className="text-2xl">{item.icon}</span>
-                  <p className="font-display text-xl md:text-2xl font-semibold text-muted-foreground/40 line-through">
-                    {item.problem}
-                  </p>
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, hsl(${it.tint},0.2), hsl(${it.tint},0.08))` }}>
+                    <Icon className="w-5 h-5" style={{ color: `hsl(${it.tint})` }} />
+                  </div>
+                  <p className="font-display text-lg md:text-xl font-semibold text-foreground/40 line-through">{it.problem}</p>
                 </div>
-                <div className="hidden md:block h-12 w-px bg-border shrink-0" />
-                <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-                  {item.solution}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+                <div className="hidden md:block h-10 w-px bg-gradient-to-b from-transparent via-border to-transparent" />
+                <p className="relative text-foreground/75 leading-relaxed text-sm md:text-base">{it.solution}</p>
+              </motion.div>
+            );
+          })}
         </div>
-
-        {/* CTA panel */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="bg-background/80 backdrop-blur-sm border border-border/60 rounded-3xl p-10 md:p-14 text-center shadow-sm max-w-xl w-full"
-        >
-          <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
-            Start tracking today
-          </h3>
-          <p className="text-muted-foreground text-sm mb-8">
-            Join thousands making smarter financial decisions.
-          </p>
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center gap-2 bg-foreground text-background px-8 py-4 rounded-full text-sm font-medium hover:opacity-90 transition-all duration-300 hover:shadow-lg"
-          >
-            Try FinTrack AI
-            <span className="text-lg">→</span>
-          </Link>
-        </motion.div>
       </div>
     </section>
   );
