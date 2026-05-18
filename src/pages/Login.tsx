@@ -370,13 +370,13 @@ const Login = () => {
         });
         if (error) throw error;
         setBurst(true);
-        setTimeout(() => setBurst(false), 1300);
+        setTimeout(() => setBurst(false), 2600);
         toast.success(`Welcome to your AI financial universe${fullName ? ", " + fullName.split(" ")[0] : ""} ✨`);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         setBurst(true);
-        setTimeout(() => setBurst(false), 1300);
+        setTimeout(() => setBurst(false), 2600);
         toast.success("Welcome back!");
       }
     } catch (err) {
