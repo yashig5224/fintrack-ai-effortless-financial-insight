@@ -6,6 +6,7 @@ import {
 import { Mic, Send, LogOut, Settings, Sparkles, TrendingUp, AlertTriangle, Target } from "lucide-react";
 import type { Persona } from "./PersonaSelection";
 import { lumoAvatar, coachBg } from "@/assets/personas";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: number;
