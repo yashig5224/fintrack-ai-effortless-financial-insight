@@ -183,4 +183,128 @@ const HeroPhone = () => {
   );
 };
 
+// ───── Money-flow particles ─────
+const MoneyFlow = () => {
+  // Stable random positions per render
+  const rupees = useMemo(
+    () =>
+      Array.from({ length: 9 }).map((_, i) => ({
+        id: i,
+        left: 5 + Math.random() * 90,
+        delay: Math.random() * 6,
+        duration: 14 + Math.random() * 10,
+        size: 14 + Math.random() * 18,
+        drift: (Math.random() - 0.5) * 60,
+      })),
+    []
+  );
+  const amounts = useMemo(
+    () =>
+      FLOW_AMOUNTS.map((v, i) => ({
+        id: i,
+        value: v,
+        positive: v.startsWith("+"),
+        left: 8 + ((i * 73) % 84),
+        delay: i * 1.4,
+        duration: 12 + (i % 4) * 2,
+      })),
+    []
+  );
+  const coins = useMemo(
+    () =>
+      Array.from({ length: 6 }).map((_, i) => ({
+        id: i,
+        left: 10 + Math.random() * 80,
+        top: 10 + Math.random() * 80,
+        delay: Math.random() * 4,
+        duration: 6 + Math.random() * 4,
+      })),
+    []
+  );
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden hidden sm:block">
+      {/* Rising ₹ symbols */}
+      {rupees.map((r) => (
+        <motion.div
+          key={`r-${r.id}`}
+          initial={{ opacity: 0, y: "110%", x: 0 }}
+          animate={{ opacity: [0, 0.35, 0.35, 0], y: "-20%", x: r.drift }}
+          transition={{ duration: r.duration, delay: r.delay, repeat: Infinity, ease: "linear" }}
+          className="absolute font-display font-bold select-none"
+          style={{
+            left: `${r.left}%`,
+            fontSize: `${r.size}px`,
+            color: "transparent",
+            WebkitTextStroke: "1px hsl(260,60%,70%,0.5)",
+            filter: "drop-shadow(0 0 12px hsl(220,90%,75%,0.35))",
+          }}
+        >
+          ₹
+        </motion.div>
+      ))}
+
+      {/* Floating transaction amounts */}
+      {amounts.map((a) => (
+        <motion.div
+          key={`a-${a.id}`}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: [0, 0.7, 0.7, 0], y: -90 }}
+          transition={{ duration: a.duration, delay: a.delay, repeat: Infinity, ease: "easeOut" }}
+          className="absolute text-[10px] font-semibold tracking-tight px-2 py-0.5 rounded-full backdrop-blur-sm border border-white/60"
+          style={{
+            left: `${a.left}%`,
+            bottom: "5%",
+            color: a.positive ? "hsl(150,70%,32%)" : "hsl(340,70%,42%)",
+            background: a.positive ? "hsl(150,80%,95%,0.7)" : "hsl(340,80%,96%,0.7)",
+          }}
+        >
+          {a.value}
+        </motion.div>
+      ))}
+
+      {/* Holographic coin orbs */}
+      {coins.map((c) => (
+        <motion.div
+          key={`c-${c.id}`}
+          animate={{
+            y: [0, -14, 0],
+            opacity: [0.25, 0.6, 0.25],
+            scale: [1, 1.15, 1],
+          }}
+          transition={{ duration: c.duration, delay: c.delay, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute w-3 h-3 rounded-full"
+          style={{
+            left: `${c.left}%`,
+            top: `${c.top}%`,
+            background:
+              "radial-gradient(circle at 30% 30%, hsl(45,100%,85%,0.9), hsl(35,90%,70%,0.5) 60%, transparent 80%)",
+            boxShadow: "0 0 16px hsl(45,100%,70%,0.5)",
+          }}
+        />
+      ))}
+
+      {/* Subtle data wave */}
+      <svg className="absolute inset-x-0 bottom-0 w-full h-32 opacity-30" viewBox="0 0 400 80" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="hero-wave" x1="0" x2="1">
+            <stop offset="0" stopColor="hsl(220,90%,70%)" stopOpacity="0" />
+            <stop offset="0.5" stopColor="hsl(260,80%,72%)" stopOpacity="0.6" />
+            <stop offset="1" stopColor="hsl(180,80%,70%)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <motion.path
+          d="M0,40 Q100,10 200,40 T400,40"
+          fill="none"
+          stroke="url(#hero-wave)"
+          strokeWidth="1.5"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: [0, 1, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </svg>
+    </div>
+  );
+};
+
 export default HeroPhone;
