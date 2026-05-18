@@ -1,9 +1,9 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, TrendingUp, Wallet, Target, Bot } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import BackgroundFX from "./BackgroundFX";
-import { lumoAvatar } from "@/assets/personas";
+import HeroPhone from "./HeroPhone";
 
 const HeroSection = () => {
   const ref = useRef<HTMLDivElement>(null);
