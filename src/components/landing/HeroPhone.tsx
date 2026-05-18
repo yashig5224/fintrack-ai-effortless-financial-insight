@@ -1,25 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, Sparkles, TrendingUp, Wallet, Bell, ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { Mic, Send } from "lucide-react";
 import { lumoAvatar } from "@/assets/personas";
 
 type Msg = { id: number; role: "user" | "ai"; text: string; chart?: number[] };
 
 const SCRIPT: Msg[] = [
-  { id: 1, role: "user", text: "How much did I spend on food this week?" },
-  { id: 2, role: "ai", text: "You spent ₹4,820 on food this week — 22% above your usual baseline. Mostly weekend dining.", chart: [30, 45, 28, 60, 75, 90, 70] },
+  { id: 1, role: "user", text: "How can I reduce food spending?" },
+  { id: 2, role: "ai", text: "You spent 18% more on dining this week. Want me to set a ₹4,000 weekly meal budget?", chart: [30, 45, 28, 60, 75, 90, 70] },
   { id: 3, role: "user", text: "Can I afford a Goa trip in March?" },
-  { id: 4, role: "ai", text: "Yes — at your current savings pace you'll have ₹38,400 free by March. A 3-day Goa trip fits comfortably." },
+  { id: 4, role: "ai", text: "Yes — at your current pace you'll have ₹38,400 free by March. A 3-day Goa trip fits comfortably." },
 ];
 
-const NOTIFS = [
-  { icon: Wallet, tint: "from-[hsl(25,100%,90%)] to-[hsl(15,100%,92%)]", text: "Starbucks", sub: "-₹350 · just now", color: "text-[hsl(20,80%,40%)]", side: "left", top: "8%" },
-  { icon: TrendingUp, tint: "from-[hsl(150,80%,90%)] to-[hsl(170,80%,92%)]", text: "+₹2,400 saved", sub: "this week", color: "text-[hsl(150,70%,32%)]", side: "right", top: "14%" },
-  { icon: Bell, tint: "from-[hsl(260,80%,92%)] to-[hsl(280,80%,94%)]", text: "Netflix detected", sub: "Recurring ₹649/mo", color: "text-[hsl(270,70%,45%)]", side: "left", top: "62%" },
-  { icon: Sparkles, tint: "from-[hsl(220,100%,92%)] to-[hsl(200,100%,94%)]", text: "Lumo insight", sub: "Cut dining 18%", color: "text-[hsl(220,80%,45%)]", side: "right", top: "70%" },
-  { icon: ArrowDownRight, tint: "from-[hsl(340,80%,93%)] to-[hsl(320,80%,95%)]", text: "Amazon", sub: "-₹1,299 · today", color: "text-[hsl(340,70%,42%)]", side: "right", top: "40%" },
-  { icon: ArrowUpRight, tint: "from-[hsl(150,80%,92%)] to-[hsl(170,80%,94%)]", text: "Salary credited", sub: "+₹85,000", color: "text-[hsl(150,70%,32%)]", side: "left", top: "36%" },
-];
+const FLOW_AMOUNTS = ["+₹2,400", "-₹350", "+₹85,000", "-₹1,299", "-₹649", "+₹520", "-₹240", "+₹1,800"];
 
 const HeroPhone = () => {
   const [shown, setShown] = useState<Msg[]>([SCRIPT[0]]);
@@ -177,36 +170,8 @@ const HeroPhone = () => {
         </motion.div>
       </motion.div>
 
-      {/* Floating transaction notifications (no emojis) */}
-      {NOTIFS.map((n, i) => {
-        const Icon = n.icon;
-        return (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.85, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay: 0.6 + i * 0.15, duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className={`absolute z-30 hidden sm:block ${n.side === "left" ? "-left-4 lg:-left-10" : "-right-4 lg:-right-10"}`}
-            style={{ top: n.top }}
-          >
-            <motion.div
-              animate={{ y: [0, -8 - (i % 3) * 2, 0] }}
-              transition={{ duration: 4 + i * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
-              className="rounded-2xl bg-white/90 backdrop-blur-xl border border-white shadow-[0_14px_34px_-12px_rgba(120,90,220,0.28)] px-3 py-2.5 min-w-[150px]"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${n.tint} flex items-center justify-center shrink-0`}>
-                  <Icon className={`w-4 h-4 ${n.color}`} />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[11px] font-semibold truncate">{n.text}</div>
-                  <div className="text-[10px] text-foreground/55 truncate">{n.sub}</div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        );
-      })}
+      {/* Elegant money-flow particles — holographic ₹, floating amounts, glowing coins */}
+      <MoneyFlow />
 
       {/* Orbit ring */}
       <motion.div
@@ -214,6 +179,130 @@ const HeroPhone = () => {
         transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
         className="absolute inset-0 m-auto w-[440px] h-[440px] rounded-full border border-dashed border-[hsl(260,40%,80%,0.35)] hidden lg:block pointer-events-none"
       />
+    </div>
+  );
+};
+
+// ───── Money-flow particles ─────
+const MoneyFlow = () => {
+  // Stable random positions per render
+  const rupees = useMemo(
+    () =>
+      Array.from({ length: 9 }).map((_, i) => ({
+        id: i,
+        left: 5 + Math.random() * 90,
+        delay: Math.random() * 6,
+        duration: 14 + Math.random() * 10,
+        size: 14 + Math.random() * 18,
+        drift: (Math.random() - 0.5) * 60,
+      })),
+    []
+  );
+  const amounts = useMemo(
+    () =>
+      FLOW_AMOUNTS.map((v, i) => ({
+        id: i,
+        value: v,
+        positive: v.startsWith("+"),
+        left: 8 + ((i * 73) % 84),
+        delay: i * 1.4,
+        duration: 12 + (i % 4) * 2,
+      })),
+    []
+  );
+  const coins = useMemo(
+    () =>
+      Array.from({ length: 6 }).map((_, i) => ({
+        id: i,
+        left: 10 + Math.random() * 80,
+        top: 10 + Math.random() * 80,
+        delay: Math.random() * 4,
+        duration: 6 + Math.random() * 4,
+      })),
+    []
+  );
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden hidden sm:block">
+      {/* Rising ₹ symbols */}
+      {rupees.map((r) => (
+        <motion.div
+          key={`r-${r.id}`}
+          initial={{ opacity: 0, y: "110%", x: 0 }}
+          animate={{ opacity: [0, 0.35, 0.35, 0], y: "-20%", x: r.drift }}
+          transition={{ duration: r.duration, delay: r.delay, repeat: Infinity, ease: "linear" }}
+          className="absolute font-display font-bold select-none"
+          style={{
+            left: `${r.left}%`,
+            fontSize: `${r.size}px`,
+            color: "transparent",
+            WebkitTextStroke: "1px hsl(260,60%,70%,0.5)",
+            filter: "drop-shadow(0 0 12px hsl(220,90%,75%,0.35))",
+          }}
+        >
+          ₹
+        </motion.div>
+      ))}
+
+      {/* Floating transaction amounts */}
+      {amounts.map((a) => (
+        <motion.div
+          key={`a-${a.id}`}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: [0, 0.7, 0.7, 0], y: -90 }}
+          transition={{ duration: a.duration, delay: a.delay, repeat: Infinity, ease: "easeOut" }}
+          className="absolute text-[10px] font-semibold tracking-tight px-2 py-0.5 rounded-full backdrop-blur-sm border border-white/60"
+          style={{
+            left: `${a.left}%`,
+            bottom: "5%",
+            color: a.positive ? "hsl(150,70%,32%)" : "hsl(340,70%,42%)",
+            background: a.positive ? "hsl(150,80%,95%,0.7)" : "hsl(340,80%,96%,0.7)",
+          }}
+        >
+          {a.value}
+        </motion.div>
+      ))}
+
+      {/* Holographic coin orbs */}
+      {coins.map((c) => (
+        <motion.div
+          key={`c-${c.id}`}
+          animate={{
+            y: [0, -14, 0],
+            opacity: [0.25, 0.6, 0.25],
+            scale: [1, 1.15, 1],
+          }}
+          transition={{ duration: c.duration, delay: c.delay, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute w-3 h-3 rounded-full"
+          style={{
+            left: `${c.left}%`,
+            top: `${c.top}%`,
+            background:
+              "radial-gradient(circle at 30% 30%, hsl(45,100%,85%,0.9), hsl(35,90%,70%,0.5) 60%, transparent 80%)",
+            boxShadow: "0 0 16px hsl(45,100%,70%,0.5)",
+          }}
+        />
+      ))}
+
+      {/* Subtle data wave */}
+      <svg className="absolute inset-x-0 bottom-0 w-full h-32 opacity-30" viewBox="0 0 400 80" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="hero-wave" x1="0" x2="1">
+            <stop offset="0" stopColor="hsl(220,90%,70%)" stopOpacity="0" />
+            <stop offset="0.5" stopColor="hsl(260,80%,72%)" stopOpacity="0.6" />
+            <stop offset="1" stopColor="hsl(180,80%,70%)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <motion.path
+          d="M0,40 Q100,10 200,40 T400,40"
+          fill="none"
+          stroke="url(#hero-wave)"
+          strokeWidth="1.5"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: [0, 1, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </svg>
     </div>
   );
 };
