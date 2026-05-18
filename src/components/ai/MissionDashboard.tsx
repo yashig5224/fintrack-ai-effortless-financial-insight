@@ -15,7 +15,10 @@ interface Message {
   id: number;
   role: "user" | "ai";
   text: string;
+  fullText?: string;       // target text while streaming
+  streaming?: boolean;
   insights?: Insight[];
+  chips?: string[];
 }
 
 interface Insight {
