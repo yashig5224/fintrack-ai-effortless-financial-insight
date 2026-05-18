@@ -279,7 +279,7 @@ const ProblemSolution = () => {
         <div className="relative h-[120vh]">
           <div className="sticky top-24 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
             {/* BEFORE */}
-            <motion.div style={{ opacity: leakOpacity, scale: leakScale }} className="relative">
+            <motion.div style={{ opacity: leakHighlight, scale: leakScale }} className="relative">
               <div className="flex items-center gap-2 mb-4 justify-center md:justify-start">
                 <span className="text-[10px] px-2.5 py-1 rounded-full bg-rose-50 text-rose-600 font-bold tracking-wider uppercase">
                   Before · Without Lumo
