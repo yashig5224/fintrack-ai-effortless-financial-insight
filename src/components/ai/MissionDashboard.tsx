@@ -237,13 +237,42 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
 
   useEffect(scrollToBottom, [messages, isTyping]);
 
+  // Stream a finished text into a message id, char by char, like ChatGPT.
+  const streamInto = (id: number, full: string) => {
+    let i = 0;
+    const step = Math.max(2, Math.floor(full.length / 220)); // ~220 frames total
+    const tick = () => {
+      i = Math.min(full.length, i + step);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === id ? { ...m, text: full.slice(0, i), streaming: i < full.length } : m
+        )
+      );
+      if (i < full.length) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+
+  const chipPool = (personaId: string): string[] => {
+    const pool: Record<string, string[]> = {
+      student:    ["Create a weekly food budget", "Find ₹500 I can save", "Track hostel spend"],
+      salary:     ["Automate my savings", "Plan emergency fund", "Lower my EMIs"],
+      investor:   ["Rebalance my portfolio", "Suggest a SIP", "Risk-check my stocks"],
+      hustler:    ["Forecast next month", "Estimate my taxes", "Smooth cash flow"],
+      minimalist: ["Cut 3 expenses", "Essentials-only plan", "Quiet money habits"],
+      family:     ["Plan kids' education", "Family insurance check", "Shared budget"],
+      luxury:     ["Travel budget planner", "Smart luxury swaps", "Reward optimization"],
+      crypto:     ["Allocation tips", "Stablecoin strategy", "Tax on crypto gains"],
+    };
+    return pool[personaId] ?? ["Analyze my spending", "Create a budget plan", "How can I save more?"];
+  };
+
   const sendMessage = async (text: string) => {
     const userMsg: Message = { id: nextId.current++, role: "user", text };
     const history = [...messages, userMsg];
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
-    // Fallback insights from keyword library (used alongside real AI text)
     const libReply = findReply(text, persona.id);
 
     try {
@@ -255,33 +284,35 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
         },
       });
 
-      let aiText: string;
-      if (error || !data?.text) {
-        // Fall back to local library response if AI gateway fails
-        aiText = libReply?.text
-          ?? `Here's my take on "${text}" — let's break it down through your ${persona.name} lens and find one concrete next step.`;
-      } else {
-        aiText = data.text;
-      }
+      const aiText: string =
+        !error && data?.text
+          ? data.text
+          : libReply?.text ??
+            `Let me think about "${text}" through your ${persona.name} lens and surface one concrete next step.`;
 
+      const id = nextId.current++;
       const aiMsg: Message = {
-        id: nextId.current++,
+        id,
         role: "ai",
-        text: aiText,
+        text: "",
+        fullText: aiText,
+        streaming: true,
         insights: libReply?.insights,
+        chips: chipPool(persona.id),
       };
+      setIsTyping(false);
       setMessages((prev) => [...prev, aiMsg]);
+      streamInto(id, aiText);
     } catch (e) {
       console.error("Lumo AI error", e);
-      const aiMsg: Message = {
-        id: nextId.current++,
-        role: "ai",
-        text: libReply?.text ?? "I hit a hiccup reaching the AI service. Try again in a moment.",
-        insights: libReply?.insights,
-      };
-      setMessages((prev) => [...prev, aiMsg]);
-    } finally {
+      const id = nextId.current++;
+      const fallback = libReply?.text ?? "I hit a hiccup reaching the AI service. Try again in a moment.";
       setIsTyping(false);
+      setMessages((prev) => [...prev, {
+        id, role: "ai", text: "", fullText: fallback, streaming: true,
+        insights: libReply?.insights, chips: chipPool(persona.id),
+      }]);
+      streamInto(id, fallback);
     }
   };
 
