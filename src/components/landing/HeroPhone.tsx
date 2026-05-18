@@ -170,36 +170,8 @@ const HeroPhone = () => {
         </motion.div>
       </motion.div>
 
-      {/* Floating transaction notifications (no emojis) */}
-      {NOTIFS.map((n, i) => {
-        const Icon = n.icon;
-        return (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.85, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay: 0.6 + i * 0.15, duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className={`absolute z-30 hidden sm:block ${n.side === "left" ? "-left-4 lg:-left-10" : "-right-4 lg:-right-10"}`}
-            style={{ top: n.top }}
-          >
-            <motion.div
-              animate={{ y: [0, -8 - (i % 3) * 2, 0] }}
-              transition={{ duration: 4 + i * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
-              className="rounded-2xl bg-white/90 backdrop-blur-xl border border-white shadow-[0_14px_34px_-12px_rgba(120,90,220,0.28)] px-3 py-2.5 min-w-[150px]"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${n.tint} flex items-center justify-center shrink-0`}>
-                  <Icon className={`w-4 h-4 ${n.color}`} />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[11px] font-semibold truncate">{n.text}</div>
-                  <div className="text-[10px] text-foreground/55 truncate">{n.sub}</div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        );
-      })}
+      {/* Elegant money-flow particles — holographic ₹, floating amounts, glowing coins */}
+      <MoneyFlow />
 
       {/* Orbit ring */}
       <motion.div
