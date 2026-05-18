@@ -1,25 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, Sparkles, TrendingUp, Wallet, Bell, ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { Mic, Send } from "lucide-react";
 import { lumoAvatar } from "@/assets/personas";
 
 type Msg = { id: number; role: "user" | "ai"; text: string; chart?: number[] };
 
 const SCRIPT: Msg[] = [
-  { id: 1, role: "user", text: "How much did I spend on food this week?" },
-  { id: 2, role: "ai", text: "You spent ₹4,820 on food this week — 22% above your usual baseline. Mostly weekend dining.", chart: [30, 45, 28, 60, 75, 90, 70] },
+  { id: 1, role: "user", text: "How can I reduce food spending?" },
+  { id: 2, role: "ai", text: "You spent 18% more on dining this week. Want me to set a ₹4,000 weekly meal budget?", chart: [30, 45, 28, 60, 75, 90, 70] },
   { id: 3, role: "user", text: "Can I afford a Goa trip in March?" },
-  { id: 4, role: "ai", text: "Yes — at your current savings pace you'll have ₹38,400 free by March. A 3-day Goa trip fits comfortably." },
+  { id: 4, role: "ai", text: "Yes — at your current pace you'll have ₹38,400 free by March. A 3-day Goa trip fits comfortably." },
 ];
 
-const NOTIFS = [
-  { icon: Wallet, tint: "from-[hsl(25,100%,90%)] to-[hsl(15,100%,92%)]", text: "Starbucks", sub: "-₹350 · just now", color: "text-[hsl(20,80%,40%)]", side: "left", top: "8%" },
-  { icon: TrendingUp, tint: "from-[hsl(150,80%,90%)] to-[hsl(170,80%,92%)]", text: "+₹2,400 saved", sub: "this week", color: "text-[hsl(150,70%,32%)]", side: "right", top: "14%" },
-  { icon: Bell, tint: "from-[hsl(260,80%,92%)] to-[hsl(280,80%,94%)]", text: "Netflix detected", sub: "Recurring ₹649/mo", color: "text-[hsl(270,70%,45%)]", side: "left", top: "62%" },
-  { icon: Sparkles, tint: "from-[hsl(220,100%,92%)] to-[hsl(200,100%,94%)]", text: "Lumo insight", sub: "Cut dining 18%", color: "text-[hsl(220,80%,45%)]", side: "right", top: "70%" },
-  { icon: ArrowDownRight, tint: "from-[hsl(340,80%,93%)] to-[hsl(320,80%,95%)]", text: "Amazon", sub: "-₹1,299 · today", color: "text-[hsl(340,70%,42%)]", side: "right", top: "40%" },
-  { icon: ArrowUpRight, tint: "from-[hsl(150,80%,92%)] to-[hsl(170,80%,94%)]", text: "Salary credited", sub: "+₹85,000", color: "text-[hsl(150,70%,32%)]", side: "left", top: "36%" },
-];
+const FLOW_AMOUNTS = ["+₹2,400", "-₹350", "+₹85,000", "-₹1,299", "-₹649", "+₹520", "-₹240", "+₹1,800"];
 
 const HeroPhone = () => {
   const [shown, setShown] = useState<Msg[]>([SCRIPT[0]]);
