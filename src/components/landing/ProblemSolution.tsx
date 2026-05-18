@@ -160,8 +160,8 @@ const WalletCard = ({
             style={{ height: fillH }}
             className={`absolute inset-x-0 bottom-0 ${
               isVault
-                ? "bg-gradient-to-t from-emerald-400 via-sky-400 to-violet-400"
-                : "bg-gradient-to-t from-rose-400 via-amber-300 to-rose-200"
+                ? "bg-gradient-to-t from-emerald-500 via-teal-400 to-indigo-400"
+                : "bg-gradient-to-t from-rose-500 via-pink-400 to-amber-300"
             }`}
           >
             {/* shimmer wave */}
@@ -222,11 +222,12 @@ const ProblemSolution = () => {
   const titleY = useTransform(p, [0, 0.6], [60, -20]);
 
   // Before → After morph happens between 0.25 → 0.65 of the section
+  // Keep BOTH cards fully visible and crisp — only the fill meters and a soft highlight diverge.
   const morph = useTransform(p, [0.25, 0.65], [0, 1]);
-  const leakOpacity = useTransform(morph, [0, 0.5, 1], [1, 0.3, 0]);
-  const vaultOpacity = useTransform(morph, [0, 0.5, 1], [0, 0.3, 1]);
-  const leakScale = useTransform(morph, [0, 1], [1, 0.92]);
-  const vaultScale = useTransform(morph, [0, 1], [0.92, 1]);
+  const leakScale = useTransform(morph, [0, 1], [1.02, 0.97]);
+  const vaultScale = useTransform(morph, [0, 1], [0.97, 1.02]);
+  const leakHighlight = useTransform(morph, [0, 1], [1, 0.55]);
+  const vaultHighlight = useTransform(morph, [0, 1], [0.55, 1]);
 
   // counters
   const lostNum = useTransform(morph, [0, 1], [2819, 2819]); // displayed on "before"
@@ -278,7 +279,7 @@ const ProblemSolution = () => {
         <div className="relative h-[120vh]">
           <div className="sticky top-24 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
             {/* BEFORE */}
-            <motion.div style={{ opacity: leakOpacity, scale: leakScale }} className="relative">
+            <motion.div style={{ opacity: leakHighlight, scale: leakScale }} className="relative">
               <div className="flex items-center gap-2 mb-4 justify-center md:justify-start">
                 <span className="text-[10px] px-2.5 py-1 rounded-full bg-rose-50 text-rose-600 font-bold tracking-wider uppercase">
                   Before · Without Lumo
@@ -299,7 +300,7 @@ const ProblemSolution = () => {
             </motion.div>
 
             {/* AFTER */}
-            <motion.div style={{ opacity: vaultOpacity, scale: vaultScale }} className="relative">
+            <motion.div style={{ opacity: vaultHighlight, scale: vaultScale }} className="relative">
               <div className="flex items-center gap-2 mb-4 justify-center md:justify-start">
                 <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 font-bold tracking-wider uppercase">
                   After · With Lumo

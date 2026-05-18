@@ -3,16 +3,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart, Bar, ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
-import { Mic, Send, LogOut, Settings, Sparkles, TrendingUp, AlertTriangle, Target } from "lucide-react";
+import { Mic, Send, LogOut, Settings, Sparkles, TrendingUp, AlertTriangle, Target, Copy, RotateCcw, ThumbsUp, ThumbsDown, Bookmark } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { Persona } from "./PersonaSelection";
 import { lumoAvatar, coachBg } from "@/assets/personas";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Message {
   id: number;
   role: "user" | "ai";
   text: string;
+  fullText?: string;       // target text while streaming
+  streaming?: boolean;
   insights?: Insight[];
+  chips?: string[];
 }
 
 interface Insight {
@@ -231,13 +237,42 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
 
   useEffect(scrollToBottom, [messages, isTyping]);
 
+  // Stream a finished text into a message id, char by char, like ChatGPT.
+  const streamInto = (id: number, full: string) => {
+    let i = 0;
+    const step = Math.max(2, Math.floor(full.length / 220)); // ~220 frames total
+    const tick = () => {
+      i = Math.min(full.length, i + step);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === id ? { ...m, text: full.slice(0, i), streaming: i < full.length } : m
+        )
+      );
+      if (i < full.length) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+
+  const chipPool = (personaId: string): string[] => {
+    const pool: Record<string, string[]> = {
+      student:    ["Create a weekly food budget", "Find ₹500 I can save", "Track hostel spend"],
+      salary:     ["Automate my savings", "Plan emergency fund", "Lower my EMIs"],
+      investor:   ["Rebalance my portfolio", "Suggest a SIP", "Risk-check my stocks"],
+      hustler:    ["Forecast next month", "Estimate my taxes", "Smooth cash flow"],
+      minimalist: ["Cut 3 expenses", "Essentials-only plan", "Quiet money habits"],
+      family:     ["Plan kids' education", "Family insurance check", "Shared budget"],
+      luxury:     ["Travel budget planner", "Smart luxury swaps", "Reward optimization"],
+      crypto:     ["Allocation tips", "Stablecoin strategy", "Tax on crypto gains"],
+    };
+    return pool[personaId] ?? ["Analyze my spending", "Create a budget plan", "How can I save more?"];
+  };
+
   const sendMessage = async (text: string) => {
     const userMsg: Message = { id: nextId.current++, role: "user", text };
     const history = [...messages, userMsg];
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
-    // Fallback insights from keyword library (used alongside real AI text)
     const libReply = findReply(text, persona.id);
 
     try {
@@ -249,33 +284,35 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
         },
       });
 
-      let aiText: string;
-      if (error || !data?.text) {
-        // Fall back to local library response if AI gateway fails
-        aiText = libReply?.text
-          ?? `Here's my take on "${text}" — let's break it down through your ${persona.name} lens and find one concrete next step.`;
-      } else {
-        aiText = data.text;
-      }
+      const aiText: string =
+        !error && data?.text
+          ? data.text
+          : libReply?.text ??
+            `Let me think about "${text}" through your ${persona.name} lens and surface one concrete next step.`;
 
+      const id = nextId.current++;
       const aiMsg: Message = {
-        id: nextId.current++,
+        id,
         role: "ai",
-        text: aiText,
+        text: "",
+        fullText: aiText,
+        streaming: true,
         insights: libReply?.insights,
+        chips: chipPool(persona.id),
       };
+      setIsTyping(false);
       setMessages((prev) => [...prev, aiMsg]);
+      streamInto(id, aiText);
     } catch (e) {
       console.error("Lumo AI error", e);
-      const aiMsg: Message = {
-        id: nextId.current++,
-        role: "ai",
-        text: libReply?.text ?? "I hit a hiccup reaching the AI service. Try again in a moment.",
-        insights: libReply?.insights,
-      };
-      setMessages((prev) => [...prev, aiMsg]);
-    } finally {
+      const id = nextId.current++;
+      const fallback = libReply?.text ?? "I hit a hiccup reaching the AI service. Try again in a moment.";
       setIsTyping(false);
+      setMessages((prev) => [...prev, {
+        id, role: "ai", text: "", fullText: fallback, streaming: true,
+        insights: libReply?.insights, chips: chipPool(persona.id),
+      }]);
+      streamInto(id, fallback);
     }
   };
 
@@ -402,15 +439,46 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                     
                     {/* AI Message Container */}
                     <div className="space-y-4 w-full">
-                      <div className="glass-card p-6 sm:p-8 rounded-[32px] rounded-tl-xl bg-white/80 border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative">
+                      <div className="glass-card p-6 sm:p-7 rounded-[32px] rounded-tl-xl bg-white/85 border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full blur-[20px] pointer-events-none" />
-                        <p className="text-lg sm:text-xl leading-relaxed text-gray-800 font-medium relative z-10">
-                          {msg.text}
-                        </p>
+                        <div className="relative z-10 prose prose-sm sm:prose-base max-w-none prose-headings:font-display prose-headings:font-bold prose-headings:text-gray-900 prose-h2:text-base prose-h2:uppercase prose-h2:tracking-wider prose-h2:text-gray-500 prose-h2:mt-4 prose-h2:mb-2 prose-p:text-gray-800 prose-p:leading-relaxed prose-strong:text-gray-900 prose-ul:my-2 prose-li:my-0.5 prose-li:text-gray-700">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {msg.text || "‎"}
+                          </ReactMarkdown>
+                          {msg.streaming && (
+                            <span className="inline-block w-2 h-5 align-[-2px] ml-0.5 bg-blue-500 animate-pulse rounded-sm" />
+                          )}
+                        </div>
+
+                        {/* Toolbar */}
+                        {!msg.streaming && (
+                          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center gap-1 text-gray-400">
+                            <button onClick={() => { navigator.clipboard.writeText(msg.text); toast.success("Copied"); }} className="p-1.5 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition-colors" title="Copy"><Copy className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => sendMessage(messages.find(x => x.role === 'user' && x.id < msg.id)?.text ?? 'Try again')} className="p-1.5 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition-colors" title="Regenerate"><RotateCcw className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => toast.success("Thanks for the feedback")} className="p-1.5 rounded-lg hover:bg-gray-100 hover:text-emerald-600 transition-colors" title="Helpful"><ThumbsUp className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => toast("Got it — I'll improve")} className="p-1.5 rounded-lg hover:bg-gray-100 hover:text-rose-600 transition-colors" title="Not helpful"><ThumbsDown className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => toast.success("Saved to insights")} className="p-1.5 rounded-lg hover:bg-gray-100 hover:text-amber-600 transition-colors" title="Save"><Bookmark className="w-3.5 h-3.5" /></button>
+                          </div>
+                        )}
                       </div>
 
+                      {/* Follow-up suggestion chips */}
+                      {!msg.streaming && msg.chips && msg.chips.length > 0 && (
+                        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-wrap gap-2">
+                          {msg.chips.map((chip) => (
+                            <button
+                              key={chip}
+                              onClick={() => sendMessage(chip)}
+                              className="px-3.5 py-2 text-sm rounded-full bg-white/80 border border-gray-200 text-gray-700 hover:text-gray-900 hover:border-blue-300 hover:bg-white hover:shadow-md transition-all backdrop-blur-md flex items-center gap-1.5"
+                            >
+                              <Sparkles className="w-3 h-3 text-blue-500" /> {chip}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+
                       {/* Dynamic AI Insights */}
-                      {msg.insights && msg.insights.length > 0 && (
+                      {msg.insights && msg.insights.length > 0 && !msg.streaming && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {msg.insights.map((insight, idx) => (
                             <motion.div
@@ -426,7 +494,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                               <p className="font-display text-3xl font-bold text-gray-900 mb-3">
                                 <AnimatedValue value={insight.value} />
                               </p>
-                              
+
                               {insight.change && (
                                 <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg ${
                                   insight.positive
@@ -435,7 +503,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                                     ? "bg-rose-50 text-rose-700"
                                     : "bg-gray-100 text-gray-600"
                                 }`}>
-                                  {insight.positive ? <TrendingUp className="w-3.5 h-3.5" /> : insight.positive === false ? <AlertTriangle className="w-3.5 h-3.5" /> : null} 
+                                  {insight.positive ? <TrendingUp className="w-3.5 h-3.5" /> : insight.positive === false ? <AlertTriangle className="w-3.5 h-3.5" /> : null}
                                   {insight.change}
                                 </div>
                               )}
@@ -471,9 +539,9 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                   </div>
                 ) : (
                   <div className="max-w-[85%] sm:max-w-[70%]">
-                    <div className="p-6 sm:p-8 rounded-[32px] rounded-tr-xl bg-gray-900 text-white shadow-xl shadow-gray-900/10 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-[30px]" />
-                      <p className="text-lg sm:text-xl leading-relaxed relative z-10">
+                    <div className="p-5 sm:p-6 rounded-[28px] rounded-tr-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-sky-500 text-white shadow-[0_12px_40px_-12px_rgba(99,102,241,0.5)] relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/15 rounded-full blur-[30px]" />
+                      <p className="text-base sm:text-lg leading-relaxed relative z-10 font-medium">
                         {msg.text}
                       </p>
                     </div>
@@ -496,15 +564,19 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                     <img src={lumoAvatar} alt="Lumo AI" className="w-full h-full object-cover" />
                   </div>
                 </div>
-                <div className="p-6 rounded-[24px] rounded-tl-xl bg-white/60 border border-white backdrop-blur-xl flex items-center gap-2 h-[72px]">
-                  {[0, 1, 2].map((i) => (
-                    <motion.div
-                      key={i}
-                      animate={{ y: [0, -8, 0], scale: [1, 1.2, 1] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
-                      className="w-2.5 h-2.5 bg-gray-400 rounded-full"
-                    />
-                  ))}
+                <div className="px-5 py-4 rounded-[24px] rounded-tl-xl bg-white/80 border border-white backdrop-blur-xl flex items-center gap-3 shadow-sm">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                    className="w-5 h-5 rounded-full border-2 border-blue-200 border-t-blue-500"
+                  />
+                  <motion.span
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.6, repeat: Infinity }}
+                    className="text-sm font-medium bg-gradient-to-r from-indigo-600 via-violet-500 to-sky-500 bg-clip-text text-transparent"
+                  >
+                    Lumo AI is analyzing your finances…
+                  </motion.span>
                 </div>
               </motion.div>
             )}
