@@ -216,15 +216,141 @@ interface MissionDashboardProps {
   onBack: () => void;
 }
 
+interface Thread {
+  id: string;
+  title: string;
+  personaId: string;
+  personaName: string;
+  messages: Message[];
+  updatedAt: number;
+  pinned?: boolean;
+}
+
+const STORAGE_KEY = "lumo_threads_v1";
+
+const loadThreads = (): Thread[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as Thread[]) : [];
+  } catch { return []; }
+};
+
+const saveThreads = (t: Thread[]) => {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(t)); } catch {}
+};
+
+const autoTitle = (msg: string) => {
+  const cleaned = msg.replace(/[^\w\s₹.,?-]/g, "").trim();
+  const words = cleaned.split(/\s+/).slice(0, 6).join(" ");
+  return (words.length > 44 ? words.slice(0, 44) + "…" : words) || "New Chat";
+};
+
 const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
   const accentColor = `hsl(${persona.accentHsl})`;
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 0,
-      role: "ai",
-      text: `Hey, I'm Lumo AI ✨ — your ${persona.name} coach. I've scanned your recent transactions and I'm ready to help. What should we tackle first?`,
-    },
-  ]);
+
+  const greetingMsg = (): Message => ({
+    id: 0,
+    role: "ai",
+    text: `Hey, I'm Lumo AI ✨ — your ${persona.name} coach. I've scanned your recent transactions and I'm ready to help. What should we tackle first?`,
+  });
+
+  const [threads, setThreads] = useState<Thread[]>(() => loadThreads());
+  const [activeId, setActiveId] = useState<string>(() => {
+    const all = loadThreads();
+    const mine = all.filter((t) => t.personaId === persona.id);
+    if (mine.length) return mine[0].id;
+    const id = `t_${Date.now()}`;
+    const next: Thread = {
+      id, personaId: persona.id, personaName: persona.name,
+      title: "New Chat", messages: [greetingMsg()], updatedAt: Date.now(),
+    };
+    const merged = [next, ...all];
+    saveThreads(merged);
+    return id;
+  });
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Sync threads list when activeId initializes a new thread
+  useEffect(() => {
+    setThreads(loadThreads());
+  }, []);
+
+  const activeThread = useMemo(
+    () => threads.find((t) => t.id === activeId),
+    [threads, activeId]
+  );
+
+  const messages = activeThread?.messages ?? [greetingMsg()];
+
+  const setMessages = (updater: Message[] | ((prev: Message[]) => Message[])) => {
+    setThreads((prev) => {
+      const next = prev.map((t) => {
+        if (t.id !== activeId) return t;
+        const newMsgs = typeof updater === "function" ? updater(t.messages) : updater;
+        // Auto-title from first user message
+        let title = t.title;
+        if (title === "New Chat") {
+          const firstUser = newMsgs.find((m) => m.role === "user");
+          if (firstUser) title = autoTitle(firstUser.text);
+        }
+        return { ...t, messages: newMsgs, title, updatedAt: Date.now() };
+      });
+      saveThreads(next);
+      return next;
+    });
+  };
+
+  const newChat = () => {
+    const id = `t_${Date.now()}`;
+    const t: Thread = {
+      id, personaId: persona.id, personaName: persona.name,
+      title: "New Chat", messages: [greetingMsg()], updatedAt: Date.now(),
+    };
+    setThreads((prev) => {
+      const next = [t, ...prev];
+      saveThreads(next);
+      return next;
+    });
+    setActiveId(id);
+    toast.success("New financial chat started");
+  };
+
+  const deleteChat = (id: string) => {
+    setThreads((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      saveThreads(next);
+      if (id === activeId) {
+        const mine = next.filter((t) => t.personaId === persona.id);
+        if (mine.length) setActiveId(mine[0].id);
+        else {
+          const nid = `t_${Date.now()}`;
+          const fresh: Thread = {
+            id: nid, personaId: persona.id, personaName: persona.name,
+            title: "New Chat", messages: [greetingMsg()], updatedAt: Date.now(),
+          };
+          const m = [fresh, ...next]; saveThreads(m); setActiveId(nid);
+          return m;
+        }
+      }
+      return next;
+    });
+  };
+
+  const togglePin = (id: string) => {
+    setThreads((prev) => {
+      const next = prev.map((t) => t.id === id ? { ...t, pinned: !t.pinned } : t);
+      saveThreads(next);
+      return next;
+    });
+  };
+
+  const personaThreads = useMemo(() => {
+    return threads
+      .filter((t) => t.personaId === persona.id)
+      .sort((a, b) => (Number(!!b.pinned) - Number(!!a.pinned)) || (b.updatedAt - a.updatedAt));
+  }, [threads, persona.id]);
+
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -235,7 +361,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   };
 
-  useEffect(scrollToBottom, [messages, isTyping]);
+  useEffect(scrollToBottom, [messages.length, isTyping, activeId]);
 
   // Stream a finished text into a message id, char by char, like ChatGPT.
   const streamInto = (id: number, full: string) => {
