@@ -450,13 +450,106 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
 
   const quickActions = personaPrompts[persona.id] ?? defaultActions;
 
+  const Sidebar = (
+    <motion.aside
+      initial={false}
+      animate={{ width: sidebarOpen ? 288 : 0, opacity: sidebarOpen ? 1 : 0 }}
+      transition={{ type: "spring", stiffness: 240, damping: 30 }}
+      className="shrink-0 h-full relative z-30 overflow-hidden"
+    >
+      <div className="w-72 h-full flex flex-col bg-white/70 backdrop-blur-2xl border-r border-white/80 shadow-[0_10px_40px_-20px_rgba(15,23,42,0.15)]">
+        <div className="p-4 border-b border-slate-100/70">
+          <button
+            onClick={newChat}
+            className="group w-full relative overflow-hidden flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-sky-500 shadow-[0_10px_30px_-10px_rgba(99,102,241,0.6)] hover:-translate-y-0.5 transition-transform"
+          >
+            <motion.span aria-hidden initial={{ x: "-150%" }} animate={{ x: "150%" }} transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
+            <Plus className="w-4 h-4 relative" /> <span className="relative">New Financial Chat</span>
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto scrollbar-none px-2 py-3 space-y-1">
+          <p className="px-3 text-[10px] uppercase tracking-[0.18em] text-slate-400 font-bold mb-2">Conversations</p>
+          {personaThreads.length === 0 && (
+            <p className="px-3 text-xs text-slate-400">No chats yet</p>
+          )}
+          {personaThreads.map((t) => {
+            const isActive = t.id === activeId;
+            return (
+              <div
+                key={t.id}
+                onClick={() => setActiveId(t.id)}
+                className={`group cursor-pointer flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all ${
+                  isActive
+                    ? "bg-gradient-to-r from-indigo-50 via-violet-50 to-sky-50 border border-indigo-200/60 shadow-sm"
+                    : "hover:bg-white/80 border border-transparent"
+                }`}
+              >
+                <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-indigo-500" : "text-slate-400"}`} />
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm truncate ${isActive ? "text-slate-900 font-semibold" : "text-slate-700"}`}>
+                    {t.title}
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    {new Date(t.updatedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                  </p>
+                </div>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); togglePin(t.id); }}
+                    className={`p-1 rounded-md hover:bg-white ${t.pinned ? "text-amber-500" : "text-slate-300 hover:text-slate-600"}`}
+                    title={t.pinned ? "Unpin" : "Pin"}
+                  >
+                    <Pin className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); deleteChat(t.id); }}
+                    className="p-1 rounded-md text-slate-300 hover:text-rose-500 hover:bg-white"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+                {t.pinned && (
+                  <Pin className="w-3 h-3 text-amber-400 opacity-100 group-hover:hidden" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="p-3 border-t border-slate-100/70 flex items-center gap-2 text-xs text-slate-500">
+          <div className="w-7 h-7 rounded-xl overflow-hidden ring-2 ring-white shadow-sm">
+            <img src={lumoAvatar} alt="" className="w-full h-full object-cover" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-slate-700 truncate">Lumo AI</p>
+            <p className="text-[10px] text-slate-400">{persona.name} persona</p>
+          </div>
+          <button onClick={onBack} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-white" title="Switch persona">
+            <Settings className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </motion.aside>
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="flex flex-col h-full w-full absolute inset-0 overflow-hidden bg-[#fafafa]"
+      className="flex flex-row h-full w-full absolute inset-0 overflow-hidden bg-[#fafafa]"
     >
+      {Sidebar}
+      <div className="relative flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <button
+        onClick={() => setSidebarOpen((v) => !v)}
+        className="absolute top-4 left-4 z-40 w-10 h-10 rounded-xl bg-white/80 backdrop-blur-md border border-white shadow-sm flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white transition-all"
+        title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+      >
+        {sidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+      </button>
       {/* Uploaded immersive background */}
       <div className="absolute inset-0 -z-0 pointer-events-none">
         <img src={coachBg} alt="" className="w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
