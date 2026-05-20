@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
 import { lumoAvatar } from "@/assets/personas";
 import BackgroundFX from "./BackgroundFX";
+import HeroPhone from "./HeroPhone";
 
 const turns = [
   { role: "user", text: "How much did I spend on food this month?" },
