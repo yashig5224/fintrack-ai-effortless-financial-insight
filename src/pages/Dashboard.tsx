@@ -7,6 +7,7 @@ import {
 } from "recharts";
 import { Sparkles, Target, Wallet, TrendingUp, CreditCard, ChevronRight, LayoutDashboard, Search, Bell, MessageSquare } from "lucide-react";
 import { getCategoryIcon, NAV_ICONS } from "@/assets/icons";
+import LumoMascot from "@/components/lumo/LumoMascot";
 
 // Mock Data
 const areaData = [
