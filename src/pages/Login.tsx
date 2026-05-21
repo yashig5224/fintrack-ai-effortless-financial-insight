@@ -22,6 +22,7 @@ import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import authBg from "@/assets/auth-bg.png";
+import LumoMascotShared, { type LumoTrigger } from "@/components/lumo/LumoMascot";
 
 /* ────────────────────────────────────────────────────────────── */
 /*  Animated background — mesh gradient orbs + drifting rupees    */
