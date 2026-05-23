@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
-import { AmbientLayer } from "@/components/landing/AmbientLayer";
+import AmbientLayer from "@/components/landing/AmbientLayer";
 import { PLANS, COMPARISON_ROWS, FAQ_ITEMS, BillingCycle, Plan } from "@/lib/plans";
 import { CheckoutDialog } from "@/components/payments/CheckoutDialog";
 import { useAuth } from "@/contexts/AuthContext";
