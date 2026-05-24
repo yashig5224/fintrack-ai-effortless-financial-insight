@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Sparkles, ArrowRight, Shield, TrendingUp, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,9 @@ import AmbientLayer from "@/components/landing/AmbientLayer";
 import { PLANS, COMPARISON_ROWS, FAQ_ITEMS, BillingCycle, Plan } from "@/lib/plans";
 import { CheckoutDialog } from "@/components/payments/CheckoutDialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
+import { getPendingCheckout, setPendingCheckout, clearPendingCheckout } from "@/lib/pendingCheckout";
 
 function PriceDisplay({ plan, cycle }: { plan: Plan; cycle: BillingCycle }) {
   const amount = cycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
