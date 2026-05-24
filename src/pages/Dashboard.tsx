@@ -819,6 +819,8 @@ const Dashboard = () => {
           <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-white animate-pulse" />
         </div>
       </Link>
+
+      <UpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} tier={upgradeTier} />
     </div>
   );
 };
