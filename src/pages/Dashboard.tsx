@@ -144,18 +144,42 @@ const Dashboard = () => {
           })}
         </nav>
 
+        {/* Upgrade CTA */}
+        {!isPro && !sidebarCollapsed && (
+          <div className="px-4 pb-3">
+            <motion.button
+              onClick={() => openUpgrade("pro")}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="relative w-full overflow-hidden rounded-2xl p-4 text-left bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-lg shadow-indigo-500/30 group"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_50%)] pointer-events-none" />
+              <motion.div
+                animate={{ x: ["-100%", "200%"] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-y-0 -inset-x-1 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12 pointer-events-none"
+              />
+              <div className="relative flex items-center gap-2 mb-1">
+                <Crown className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Upgrade to Pro</span>
+              </div>
+              <p className="relative text-[11px] text-white/80 leading-snug">Unlock unlimited AI, forecasts & heatmaps.</p>
+            </motion.button>
+          </div>
+        )}
+
         <div className="p-4 border-t border-border/40 mt-auto">
-          <div className="flex items-center gap-3 p-2 rounded-2xl hover:bg-gray-100/80 transition-colors cursor-pointer">
+          <Link to="/billing" className="flex items-center gap-3 p-2 rounded-2xl hover:bg-gray-100/80 transition-colors cursor-pointer">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-100 to-purple-100 flex items-center justify-center border border-white shadow-sm shrink-0">
               <span className="text-gray-700 text-sm font-bold">JD</span>
             </div>
             {!sidebarCollapsed && (
               <div className="overflow-hidden">
                 <p className="text-sm font-medium text-gray-900 truncate">John Doe</p>
-                <p className="text-xs text-gray-500 truncate">Pro Member</p>
+                <p className="text-xs text-gray-500 truncate">{planLabel} Member</p>
               </div>
             )}
-          </div>
+          </Link>
         </div>
       </aside>
 
