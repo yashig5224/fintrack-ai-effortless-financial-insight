@@ -26,6 +26,7 @@ const Index = () => {
         <HowItWorks />
         <DemoVsUser />
         <StatsAndTestimonials />
+        <PricingPreview />
         <CTASection />
         <Footer />
       </div>
