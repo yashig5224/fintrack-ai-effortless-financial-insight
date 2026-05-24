@@ -59,7 +59,15 @@ const sidebarItems = [
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeTier, setUpgradeTier] = useState<"pro" | "elite">("pro");
   const navigate = useNavigate();
+  const { tier, isPro } = useSubscription();
+
+  const openUpgrade = (t: "pro" | "elite" = "pro") => {
+    setUpgradeTier(t);
+    setUpgradeOpen(true);
+  };
 
   const handleTabClick = (id: string) => {
     if (id === "chat") {
@@ -68,6 +76,14 @@ const Dashboard = () => {
       setActiveTab(id);
     }
   };
+
+  const planLabel = tier === "elite" ? "Elite AI+" : tier === "pro" ? "Pro" : "Free";
+  const planAccent =
+    tier === "elite"
+      ? "from-violet-500 to-fuchsia-500"
+      : tier === "pro"
+      ? "from-indigo-500 to-blue-500"
+      : "from-slate-700 to-slate-900";
 
   return (
     <div className="min-h-screen bg-[#fafafa] flex overflow-hidden selection:bg-primary/10 relative">
