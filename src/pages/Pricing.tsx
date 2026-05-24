@@ -49,20 +49,42 @@ export default function Pricing() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { tier } = useSubscription();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const openCheckoutFor = (priceId: string, planName: string) => {
+    setCheckoutPriceId(priceId);
+    setCheckoutPlan(planName);
+  };
+
+  // Resume a pending checkout after the user has just logged in.
+  useEffect(() => {
+    if (!user) return;
+    const pending = getPendingCheckout();
+    const shouldResume = searchParams.get("checkout") === "1" || pending;
+    if (shouldResume && pending) {
+      setCycle(pending.cycle);
+      openCheckoutFor(pending.priceId, pending.planName);
+      clearPendingCheckout();
+      if (searchParams.get("checkout")) {
+        searchParams.delete("checkout");
+        setSearchParams(searchParams, { replace: true });
+      }
+    }
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelect = (plan: Plan) => {
     if (plan.id === "free") {
-      navigate(user ? "/dashboard" : "/login");
-      return;
-    }
-    if (!user) {
-      navigate("/login?redirect=/pricing");
+      navigate(user ? "/app" : "/login");
       return;
     }
     const priceId = cycle === "yearly" ? plan.priceIdYearly : plan.priceIdMonthly;
     if (!priceId) return;
-    setCheckoutPriceId(priceId);
-    setCheckoutPlan(plan.name);
+    if (!user) {
+      setPendingCheckout({ priceId, planName: plan.name, cycle });
+      navigate("/login?redirect=/pricing?checkout=1");
+      return;
+    }
+    openCheckoutFor(priceId, plan.name);
   };
 
   const savings = useMemo(() => {
