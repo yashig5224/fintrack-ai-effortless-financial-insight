@@ -22,10 +22,10 @@ const Navbar = () => {
   }, [open]);
 
   const links = [
-    { href: "#features", label: "Features" },
-    { href: "#coach", label: "AI Coach" },
-    { href: "#personas", label: "Personas" },
-    { href: "#dashboard", label: "Dashboard" },
+    { href: "/#features", label: "Features" },
+    { href: "/#coach", label: "AI Coach" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/dashboard", label: "Dashboard" },
   ];
 
   return (
