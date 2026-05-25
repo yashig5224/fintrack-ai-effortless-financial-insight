@@ -13,7 +13,6 @@ import UserApp from "./pages/UserApp";
 import OnboardingFlow from "./components/auth/OnboardingFlow";
 import Pricing from "./pages/Pricing";
 import Billing from "./pages/Billing";
-import CheckoutReturn from "./pages/CheckoutReturn";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,19 +25,24 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Public */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/coach" element={<Coach />} />
             <Route path="/dashboard" element={<Dashboard />} />
+
+            {/* Protected */}
             <Route path="/onboarding" element={
               <ProtectedRoute requireOnboarding={false}><OnboardingFlow /></ProtectedRoute>
             } />
             <Route path="/app" element={
               <ProtectedRoute><UserApp /></ProtectedRoute>
             } />
-            <Route path="/coach" element={<Coach />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/billing" element={<Billing />} />
-            <Route path="/checkout/return" element={<CheckoutReturn />} />
+            <Route path="/billing" element={
+              <ProtectedRoute requireOnboarding={false}><Billing /></ProtectedRoute>
+            } />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
