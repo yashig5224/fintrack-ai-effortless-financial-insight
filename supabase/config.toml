@@ -1,10 +1,10 @@
-project_id = "ikhewpawkwtfkmclkkxq"
+project_id = "fncmsgnjebbmdxjpreir"
 
-[functions.create-razorpay-order]
+[functions.create-checkout]
 verify_jwt = false
 
-[functions.verify-razorpay-payment]
+[functions.payments-webhook]
 verify_jwt = false
 
-[functions.cancel-subscription]
+[functions.create-portal-session]
 verify_jwt = false
