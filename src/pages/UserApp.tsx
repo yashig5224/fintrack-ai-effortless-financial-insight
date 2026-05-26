@@ -203,7 +203,7 @@ const UserApp = () => {
             <AnimatePresence mode="wait">
               <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
                 {tab === "overview" && (
-                  <Overview stats={stats} insights={insights} trendData={trendData} categoryData={categoryData} currency={currency} persona={profile?.selected_persona} />
+                  <Overview stats={stats} insights={insights} trendData={trendData} categoryData={categoryData} currency={currency} persona={profile?.selected_persona} tier={tier} onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")} />
                 )}
                 {tab === "transactions" && (
                   <Transactions
