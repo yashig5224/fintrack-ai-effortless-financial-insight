@@ -183,6 +183,17 @@ const UserApp = () => {
               <div className="px-3 py-1.5 rounded-full bg-white border border-gray-100 text-xs font-semibold text-gray-700 shadow-sm">
                 Lvl {profile?.level ?? 1} • {profile?.xp ?? 0} XP
               </div>
+              <div className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-sm border ${isElite ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white border-transparent" : isPro ? "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-transparent" : "bg-white text-gray-600 border-gray-200"}`}>
+                {isElite ? "Elite AI+" : isPro ? "Pro AI" : "Free"}
+              </div>
+              {!isElite && (
+                <button
+                  onClick={() => openUpgrade(isPro ? "elite" : "pro")}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 shadow-md shadow-indigo-500/30 hover:opacity-95"
+                >
+                  <Crown className="w-3.5 h-3.5" /> {isPro ? "Go Elite" : "Upgrade"}
+                </button>
+              )}
             </div>
           </div>
         </header>
