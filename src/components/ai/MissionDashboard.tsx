@@ -1,15 +1,46 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart, Bar, ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
-import { Mic, Send, LogOut, Settings, Sparkles, TrendingUp, AlertTriangle, Target, Copy, RotateCcw, ThumbsUp, ThumbsDown, Bookmark, Plus, MessageSquare, Trash2, PanelLeftClose, PanelLeftOpen, Pin } from "lucide-react";
+import { Mic, Send, LogOut, Settings, Sparkles, TrendingUp, AlertTriangle, Target, Copy, RotateCcw, ThumbsUp, ThumbsDown, Bookmark, Plus, MessageSquare, Trash2, PanelLeftClose, PanelLeftOpen, Pin, Lock, Crown, Zap, Brain, Mic2, FileDown, LineChart as LineChartIcon, HeartHandshake, ChevronDown, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Persona } from "./PersonaSelection";
 import { lumoAvatar, coachBg } from "@/assets/personas";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSubscription, type PlanTier } from "@/hooks/useSubscription";
+import { useAuth } from "@/contexts/AuthContext";
+import { UpgradeModal } from "@/components/payments/UpgradeModal";
+import { getAiUsage, consumeAiUsage, FREE_DAILY_LIMIT } from "@/lib/aiUsage";
+
+// ─── Plan-gated AI model catalog ─────────────────────────────────────────────
+interface AiModelOption {
+  id: string;
+  label: string;
+  vendor: "Lumo" | "GPT" | "Gemini" | "Claude";
+  specialty: string;
+  speed: string;
+  minTier: PlanTier;
+}
+const AI_MODELS: AiModelOption[] = [
+  { id: "lumo",     label: "Lumo Core",     vendor: "Lumo",   specialty: "Balanced",      speed: "Fast",     minTier: "free"  },
+  { id: "gpt",      label: "GPT-class",     vendor: "GPT",    specialty: "Reasoning",     speed: "Medium",   minTier: "pro"   },
+  { id: "gemini",   label: "Gemini Pro",    vendor: "Gemini", specialty: "Speed",         speed: "Ultra",    minTier: "pro"   },
+  { id: "claude",   label: "Claude Sonnet", vendor: "Claude", specialty: "Deep analysis", speed: "Medium",   minTier: "elite" },
+];
+const tierRank: Record<PlanTier, number> = { free: 0, pro: 1, elite: 2 };
+
+const LOCKED_FEATURES = [
+  { id: "voice",     icon: Mic2,           label: "Voice AI Coach",      minTier: "pro"   as PlanTier, desc: "Talk to Lumo and get spoken replies." },
+  { id: "forecast",  icon: LineChartIcon,  label: "AI Forecasting",      minTier: "pro"   as PlanTier, desc: "Predict next month's spend & savings." },
+  { id: "memory",    icon: Brain,          label: "AI Memory",           minTier: "pro"   as PlanTier, desc: "Lumo remembers your goals & habits." },
+  { id: "pdf",       icon: FileDown,       label: "PDF Reports",         minTier: "pro"   as PlanTier, desc: "Export investor-grade summaries." },
+  { id: "wealth",    icon: Crown,          label: "Wealth Simulations",  minTier: "elite" as PlanTier, desc: "Project your wealth across decades." },
+  { id: "emotion",   icon: HeartHandshake, label: "Emotional Analysis",  minTier: "elite" as PlanTier, desc: "Why you spend — not just what." },
+];
 
 interface Message {
   id: number;
@@ -248,6 +279,30 @@ const autoTitle = (msg: string) => {
 
 const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
   const accentColor = `hsl(${persona.accentHsl})`;
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { tier, isPro, isElite } = useSubscription();
+
+  // ── Plan-aware AI usage limiter (free only) ───────────────────────────────
+  const [usage, setUsage] = useState(() => getAiUsage());
+  const refreshUsage = () => setUsage(getAiUsage());
+  const limitReached = tier === "free" && usage.remaining <= 0;
+
+  // ── Upgrade modal ─────────────────────────────────────────────────────────
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeTier, setUpgradeTier] = useState<"pro" | "elite">("pro");
+  const [upgradeFeature, setUpgradeFeature] = useState<string | undefined>();
+  const openUpgrade = (t: "pro" | "elite" = "pro", feature?: string) => {
+    if (!user) { navigate("/pricing"); return; }
+    setUpgradeTier(t); setUpgradeFeature(feature); setUpgradeOpen(true);
+  };
+
+  // ── AI model selector (plan-gated) ────────────────────────────────────────
+  const [selectedModel, setSelectedModel] = useState<string>("lumo");
+  const [modelMenuOpen, setModelMenuOpen] = useState(false);
+  const activeModel = AI_MODELS.find((m) => m.id === selectedModel) ?? AI_MODELS[0];
+
+
 
   const greetingMsg = (): Message => ({
     id: 0,
@@ -394,12 +449,23 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
   };
 
   const sendMessage = async (text: string) => {
+    // Free tier: enforce daily AI chat cap
+    if (tier === "free") {
+      if (!consumeAiUsage()) {
+        refreshUsage();
+        toast.error("Daily AI limit reached — upgrade to keep going.");
+        return;
+      }
+      refreshUsage();
+    }
+
     const userMsg: Message = { id: nextId.current++, role: "user", text };
     const history = [...messages, userMsg];
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
     const libReply = findReply(text, persona.id);
+
 
     try {
       const { data, error } = await supabase.functions.invoke("lumo-chat", {
@@ -518,6 +584,49 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
           })}
         </div>
 
+        {/* ── Premium Powers (plan-gated previews) ─────────────────────── */}
+        <div className="px-3 pt-3 pb-1 border-t border-slate-100/70">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400 font-bold">Premium Powers</p>
+            {!isElite && (
+              <button
+                onClick={() => openUpgrade(isPro ? "elite" : "pro")}
+                className="text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent hover:opacity-80"
+              >
+                Unlock
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            {LOCKED_FEATURES.map((f) => {
+              const locked = tierRank[tier] < tierRank[f.minTier];
+              const Icon = f.icon;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => locked ? openUpgrade(f.minTier === "elite" ? "elite" : "pro", f.label) : toast(`${f.label} ready`)}
+                  className={`group relative overflow-hidden text-left p-2.5 rounded-xl border transition-all ${
+                    locked
+                      ? "bg-gradient-to-br from-white to-slate-50 border-slate-200/70 hover:border-indigo-300 hover:shadow-md"
+                      : "bg-gradient-to-br from-emerald-50 to-white border-emerald-200/70"
+                  }`}
+                  title={f.desc}
+                >
+                  {locked && (
+                    <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-white shadow-sm flex items-center justify-center">
+                      <Lock className="w-2.5 h-2.5 text-amber-500" />
+                    </div>
+                  )}
+                  <Icon className={`w-3.5 h-3.5 mb-1 ${locked ? "text-indigo-500" : "text-emerald-600"}`} />
+                  <p className="text-[11px] font-semibold text-slate-700 leading-tight">{f.label}</p>
+                  <p className="text-[9px] text-slate-400 mt-0.5">{locked ? (f.minTier === "elite" ? "Elite" : "Pro") : "Active"}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+
         <div className="p-3 border-t border-slate-100/70 flex items-center gap-2 text-xs text-slate-500">
           <div className="w-7 h-7 rounded-xl overflow-hidden ring-2 ring-white shadow-sm">
             <img src={lumoAvatar} alt="" className="w-full h-full object-cover" />
@@ -601,7 +710,112 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Plan badge */}
+            <div className={`hidden md:flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-bold backdrop-blur-xl border shadow-sm ${
+              isElite ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white border-transparent" :
+              isPro   ? "bg-gradient-to-r from-indigo-500 to-sky-500 text-white border-transparent" :
+                        "bg-white/70 text-slate-600 border-white"
+            }`}>
+              {isElite ? <Crown className="w-3.5 h-3.5" /> : isPro ? <Zap className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+              {isElite ? "Elite AI+" : isPro ? "Pro AI" : "Free"}
+            </div>
+
+            {/* AI model selector */}
+            <div className="relative">
+              <button
+                onClick={() => setModelMenuOpen((v) => !v)}
+                className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/70 border border-white backdrop-blur-xl text-xs font-semibold text-slate-700 hover:bg-white shadow-sm transition-all"
+              >
+                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                {activeModel.vendor}
+                <span className="hidden lg:inline text-slate-400 font-normal">· {activeModel.specialty}</span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
+              <AnimatePresence>
+                {modelMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                    transition={{ duration: 0.18 }}
+                    className="absolute right-0 mt-2 w-72 p-2 rounded-2xl bg-white/95 backdrop-blur-2xl border border-white shadow-[0_20px_60px_-20px_rgba(15,23,42,0.25)] z-50"
+                  >
+                    <p className="px-2.5 pt-1.5 pb-2 text-[10px] uppercase tracking-widest font-bold text-slate-400">AI Engine</p>
+                    {AI_MODELS.map((m) => {
+                      const locked = tierRank[tier] < tierRank[m.minTier];
+                      const active = m.id === selectedModel;
+                      return (
+                        <button
+                          key={m.id}
+                          onClick={() => {
+                            if (locked) {
+                              setModelMenuOpen(false);
+                              openUpgrade(m.minTier === "elite" ? "elite" : "pro", `${m.vendor} model`);
+                              return;
+                            }
+                            setSelectedModel(m.id);
+                            setModelMenuOpen(false);
+                            toast.success(`Switched to ${m.label}`);
+                          }}
+                          className={`w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-left transition-all ${
+                            active ? "bg-gradient-to-r from-indigo-50 via-violet-50 to-sky-50 ring-1 ring-indigo-200" : "hover:bg-slate-50"
+                          } ${locked ? "opacity-70" : ""}`}
+                        >
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white text-[11px] font-bold shadow ${
+                            m.vendor === "Lumo" ? "bg-gradient-to-br from-slate-700 to-slate-900" :
+                            m.vendor === "GPT" ? "bg-gradient-to-br from-emerald-500 to-teal-600" :
+                            m.vendor === "Gemini" ? "bg-gradient-to-br from-sky-500 to-indigo-600" :
+                            "bg-gradient-to-br from-orange-500 to-rose-600"
+                          }`}>{m.vendor[0]}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-sm font-semibold text-slate-800 truncate">{m.label}</p>
+                              {locked && <Lock className="w-3 h-3 text-slate-400" />}
+                              {active && !locked && <Check className="w-3.5 h-3.5 text-indigo-500" />}
+                            </div>
+                            <p className="text-[11px] text-slate-500">{m.specialty} · {m.speed}{locked ? ` · ${m.minTier === "elite" ? "Elite" : "Pro"}` : ""}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Usage meter (free only) */}
+            {tier === "free" && (
+              <button
+                onClick={() => openUpgrade("pro", "Unlimited AI chats")}
+                className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/70 border border-white backdrop-blur-xl shadow-sm hover:bg-white transition-all"
+                title="Daily AI usage"
+              >
+                <div className="relative w-7 h-7">
+                  <svg viewBox="0 0 32 32" className="w-7 h-7 -rotate-90">
+                    <circle cx="16" cy="16" r="13" fill="none" stroke="hsl(220 14% 92%)" strokeWidth="4" />
+                    <circle cx="16" cy="16" r="13" fill="none"
+                      stroke={limitReached ? "hsl(0 84% 60%)" : "url(#usageGrad)"}
+                      strokeWidth="4" strokeLinecap="round"
+                      strokeDasharray={`${(usage.used / usage.limit) * 81.68} 81.68`} />
+                    <defs>
+                      <linearGradient id="usageGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="hsl(238 84% 60%)" />
+                        <stop offset="100%" stopColor="hsl(199 89% 55%)" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none">AI Today</p>
+                  <p className={`text-xs font-bold leading-none mt-1 ${limitReached ? "text-rose-600" : "text-slate-800"}`}>
+                    {usage.used}/{usage.limit}
+                  </p>
+                </div>
+              </button>
+            )}
+
+
             <div className="glass-card bg-white/60 border-white px-4 py-2 rounded-2xl flex items-center gap-3">
               <div className="flex items-center gap-1.5">
                 <span className="text-lg">🔥</span>
@@ -794,7 +1008,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                     transition={{ duration: 1.6, repeat: Infinity }}
                     className="text-sm font-medium bg-gradient-to-r from-indigo-600 via-violet-500 to-sky-500 bg-clip-text text-transparent"
                   >
-                    Lumo AI is analyzing your finances…
+                    {isElite ? "Routing across GPT · Gemini · Claude…" : isPro ? "Running advanced financial analysis…" : "Lumo AI is analyzing your finances…"}
                   </motion.span>
                 </div>
               </motion.div>
@@ -825,31 +1039,80 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
             ))}
           </div>
 
-          {/* Floating Input Area */}
-          <div className="glass-card bg-white/80 border-white p-2 rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center gap-2">
-            <button className="w-12 h-12 flex items-center justify-center rounded-2xl text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors shrink-0">
-              <Mic className="w-6 h-6" />
-            </button>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Ask me anything about your finances..."
-              className="flex-1 bg-transparent border-none outline-none text-lg text-gray-900 placeholder:text-gray-400 px-2"
-            />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim()}
-              className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:hover:bg-gray-900 transition-colors shrink-0 shadow-md"
+          {/* Floating Input Area — or upgrade card when free-tier limit hit */}
+          {limitReached ? (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-[28px] p-6 sm:p-7 bg-gradient-to-br from-indigo-50 via-white to-violet-50 border border-indigo-200/60 shadow-[0_20px_60px_-20px_rgba(99,102,241,0.35)]"
             >
-              <Send className="w-5 h-5 -ml-0.5" />
-            </button>
-          </div>
+              <div className="absolute -top-16 -right-16 w-56 h-56 bg-violet-200/40 rounded-full blur-3xl" />
+              <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-sky-200/40 rounded-full blur-3xl" />
+              <div className="relative flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shrink-0">
+                  <Crown className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs uppercase tracking-widest font-bold text-indigo-600 mb-1">Daily limit reached</p>
+                  <h3 className="font-display text-xl sm:text-2xl font-bold text-slate-900 mb-1.5">You've used all {FREE_DAILY_LIMIT} free AI chats today.</h3>
+                  <p className="text-sm text-slate-600 mb-4">Upgrade to continue unlimited AI-powered financial coaching with smarter models, memory and forecasting.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => openUpgrade("pro", "Unlimited AI chats")}
+                      className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 shadow-md hover:-translate-y-0.5 transition-transform"
+                    >
+                      Upgrade to Pro
+                    </button>
+                    <button
+                      onClick={() => navigate("/pricing")}
+                      className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-slate-300 transition-all"
+                    >
+                      Compare plans
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <div className="glass-card bg-white/80 border-white p-2 rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center gap-2">
+              <button
+                onClick={() => isElite ? toast("Voice AI coming online…") : openUpgrade(isPro ? "elite" : "pro", "Voice AI")}
+                className="w-12 h-12 flex items-center justify-center rounded-2xl text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors shrink-0 relative"
+                title={isElite ? "Voice AI" : "Voice AI — upgrade to unlock"}
+              >
+                <Mic className="w-6 h-6" />
+                {!isElite && <Lock className="absolute top-1.5 right-1.5 w-3 h-3 text-amber-500" />}
+              </button>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                placeholder={tier === "free" ? `Ask Lumo… (${usage.remaining} chats left today)` : "Ask me anything about your finances..."}
+                className="flex-1 bg-transparent border-none outline-none text-lg text-gray-900 placeholder:text-gray-400 px-2"
+              />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim()}
+                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:hover:bg-gray-900 transition-colors shrink-0 shadow-md"
+              >
+                <Send className="w-5 h-5 -ml-0.5" />
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
       </div>
+
+      {/* Plan-gated upgrade modal */}
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        tier={upgradeTier}
+        feature={upgradeFeature}
+      />
     </motion.div>
+
   );
 };
 
