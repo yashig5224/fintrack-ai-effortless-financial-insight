@@ -996,31 +996,80 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
             ))}
           </div>
 
-          {/* Floating Input Area */}
-          <div className="glass-card bg-white/80 border-white p-2 rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center gap-2">
-            <button className="w-12 h-12 flex items-center justify-center rounded-2xl text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors shrink-0">
-              <Mic className="w-6 h-6" />
-            </button>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Ask me anything about your finances..."
-              className="flex-1 bg-transparent border-none outline-none text-lg text-gray-900 placeholder:text-gray-400 px-2"
-            />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim()}
-              className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:hover:bg-gray-900 transition-colors shrink-0 shadow-md"
+          {/* Floating Input Area — or upgrade card when free-tier limit hit */}
+          {limitReached ? (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-[28px] p-6 sm:p-7 bg-gradient-to-br from-indigo-50 via-white to-violet-50 border border-indigo-200/60 shadow-[0_20px_60px_-20px_rgba(99,102,241,0.35)]"
             >
-              <Send className="w-5 h-5 -ml-0.5" />
-            </button>
-          </div>
+              <div className="absolute -top-16 -right-16 w-56 h-56 bg-violet-200/40 rounded-full blur-3xl" />
+              <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-sky-200/40 rounded-full blur-3xl" />
+              <div className="relative flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shrink-0">
+                  <Crown className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs uppercase tracking-widest font-bold text-indigo-600 mb-1">Daily limit reached</p>
+                  <h3 className="font-display text-xl sm:text-2xl font-bold text-slate-900 mb-1.5">You've used all {FREE_DAILY_LIMIT} free AI chats today.</h3>
+                  <p className="text-sm text-slate-600 mb-4">Upgrade to continue unlimited AI-powered financial coaching with smarter models, memory and forecasting.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => openUpgrade("pro", "Unlimited AI chats")}
+                      className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 shadow-md hover:-translate-y-0.5 transition-transform"
+                    >
+                      Upgrade to Pro
+                    </button>
+                    <button
+                      onClick={() => navigate("/pricing")}
+                      className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:border-slate-300 transition-all"
+                    >
+                      Compare plans
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <div className="glass-card bg-white/80 border-white p-2 rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center gap-2">
+              <button
+                onClick={() => isElite ? toast("Voice AI coming online…") : openUpgrade(isPro ? "elite" : "pro", "Voice AI")}
+                className="w-12 h-12 flex items-center justify-center rounded-2xl text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors shrink-0 relative"
+                title={isElite ? "Voice AI" : "Voice AI — upgrade to unlock"}
+              >
+                <Mic className="w-6 h-6" />
+                {!isElite && <Lock className="absolute top-1.5 right-1.5 w-3 h-3 text-amber-500" />}
+              </button>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                placeholder={tier === "free" ? `Ask Lumo… (${usage.remaining} chats left today)` : "Ask me anything about your finances..."}
+                className="flex-1 bg-transparent border-none outline-none text-lg text-gray-900 placeholder:text-gray-400 px-2"
+              />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim()}
+                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:hover:bg-gray-900 transition-colors shrink-0 shadow-md"
+              >
+                <Send className="w-5 h-5 -ml-0.5" />
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
       </div>
+
+      {/* Plan-gated upgrade modal */}
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        tier={upgradeTier}
+        feature={upgradeFeature}
+      />
     </motion.div>
+
   );
 };
 
