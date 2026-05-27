@@ -1,15 +1,46 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart, Bar, ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
-import { Mic, Send, LogOut, Settings, Sparkles, TrendingUp, AlertTriangle, Target, Copy, RotateCcw, ThumbsUp, ThumbsDown, Bookmark, Plus, MessageSquare, Trash2, PanelLeftClose, PanelLeftOpen, Pin } from "lucide-react";
+import { Mic, Send, LogOut, Settings, Sparkles, TrendingUp, AlertTriangle, Target, Copy, RotateCcw, ThumbsUp, ThumbsDown, Bookmark, Plus, MessageSquare, Trash2, PanelLeftClose, PanelLeftOpen, Pin, Lock, Crown, Zap, Brain, Mic2, FileDown, LineChart as LineChartIcon, HeartHandshake, ChevronDown, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Persona } from "./PersonaSelection";
 import { lumoAvatar, coachBg } from "@/assets/personas";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSubscription, type PlanTier } from "@/hooks/useSubscription";
+import { useAuth } from "@/contexts/AuthContext";
+import UpgradeModal from "@/components/payments/UpgradeModal";
+import { getAiUsage, consumeAiUsage, FREE_DAILY_LIMIT } from "@/lib/aiUsage";
+
+// ─── Plan-gated AI model catalog ─────────────────────────────────────────────
+interface AiModelOption {
+  id: string;
+  label: string;
+  vendor: "Lumo" | "GPT" | "Gemini" | "Claude";
+  specialty: string;
+  speed: string;
+  minTier: PlanTier;
+}
+const AI_MODELS: AiModelOption[] = [
+  { id: "lumo",     label: "Lumo Core",     vendor: "Lumo",   specialty: "Balanced",      speed: "Fast",     minTier: "free"  },
+  { id: "gpt",      label: "GPT-class",     vendor: "GPT",    specialty: "Reasoning",     speed: "Medium",   minTier: "pro"   },
+  { id: "gemini",   label: "Gemini Pro",    vendor: "Gemini", specialty: "Speed",         speed: "Ultra",    minTier: "pro"   },
+  { id: "claude",   label: "Claude Sonnet", vendor: "Claude", specialty: "Deep analysis", speed: "Medium",   minTier: "elite" },
+];
+const tierRank: Record<PlanTier, number> = { free: 0, pro: 1, elite: 2 };
+
+const LOCKED_FEATURES = [
+  { id: "voice",     icon: Mic2,           label: "Voice AI Coach",      minTier: "pro"   as PlanTier, desc: "Talk to Lumo and get spoken replies." },
+  { id: "forecast",  icon: LineChartIcon,  label: "AI Forecasting",      minTier: "pro"   as PlanTier, desc: "Predict next month's spend & savings." },
+  { id: "memory",    icon: Brain,          label: "AI Memory",           minTier: "pro"   as PlanTier, desc: "Lumo remembers your goals & habits." },
+  { id: "pdf",       icon: FileDown,       label: "PDF Reports",         minTier: "pro"   as PlanTier, desc: "Export investor-grade summaries." },
+  { id: "wealth",    icon: Crown,          label: "Wealth Simulations",  minTier: "elite" as PlanTier, desc: "Project your wealth across decades." },
+  { id: "emotion",   icon: HeartHandshake, label: "Emotional Analysis",  minTier: "elite" as PlanTier, desc: "Why you spend — not just what." },
+];
 
 interface Message {
   id: number;
