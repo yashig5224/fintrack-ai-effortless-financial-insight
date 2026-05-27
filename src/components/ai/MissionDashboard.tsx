@@ -449,12 +449,23 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
   };
 
   const sendMessage = async (text: string) => {
+    // Free tier: enforce daily AI chat cap
+    if (tier === "free") {
+      if (!consumeAiUsage()) {
+        refreshUsage();
+        toast.error("Daily AI limit reached — upgrade to keep going.");
+        return;
+      }
+      refreshUsage();
+    }
+
     const userMsg: Message = { id: nextId.current++, role: "user", text };
     const history = [...messages, userMsg];
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
     const libReply = findReply(text, persona.id);
+
 
     try {
       const { data, error } = await supabase.functions.invoke("lumo-chat", {
