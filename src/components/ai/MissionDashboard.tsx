@@ -1003,18 +1003,38 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
                     <img src={lumoAvatar} alt="Lumo AI" className="w-full h-full object-cover" />
                   </div>
                 </div>
-                <div className="px-5 py-4 rounded-[24px] rounded-tl-xl bg-white/80 border border-white backdrop-blur-xl flex items-center gap-3 shadow-sm">
+                <div className={`px-5 py-4 rounded-[24px] rounded-tl-xl bg-white/85 border backdrop-blur-xl flex items-center gap-3 shadow-sm transition-shadow ${
+                  activeProvider === "gpt" ? "border-emerald-200 shadow-[0_0_30px_-10px_rgba(16,185,129,0.45)]" :
+                  activeProvider === "gemini" ? "border-sky-200 shadow-[0_0_30px_-10px_rgba(14,165,233,0.45)]" :
+                  activeProvider === "claude" ? "border-orange-200 shadow-[0_0_30px_-10px_rgba(244,114,82,0.5)]" :
+                  "border-white"
+                }`}>
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 rounded-full border-2 border-blue-200 border-t-blue-500"
+                    className={`w-5 h-5 rounded-full border-2 ${
+                      activeProvider === "gpt" ? "border-emerald-200 border-t-emerald-600" :
+                      activeProvider === "gemini" ? "border-sky-200 border-t-sky-600" :
+                      activeProvider === "claude" ? "border-orange-200 border-t-orange-600" :
+                      "border-blue-200 border-t-blue-500"
+                    }`}
                   />
                   <motion.span
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 1.6, repeat: Infinity }}
-                    className="text-sm font-medium bg-gradient-to-r from-indigo-600 via-violet-500 to-sky-500 bg-clip-text text-transparent"
+                    className={`text-sm font-medium bg-clip-text text-transparent ${
+                      activeProvider === "gpt" ? "bg-gradient-to-r from-emerald-600 to-teal-600" :
+                      activeProvider === "gemini" ? "bg-gradient-to-r from-sky-600 to-indigo-600" :
+                      activeProvider === "claude" ? "bg-gradient-to-r from-orange-600 to-rose-600" :
+                      "bg-gradient-to-r from-indigo-600 via-violet-500 to-sky-500"
+                    }`}
                   >
-                    {isElite ? "Routing across GPT · Gemini · Claude…" : isPro ? "Running advanced financial analysis…" : "Lumo AI is analyzing your finances…"}
+                    {activeProvider === "gpt" ? "GPT is reasoning step-by-step…" :
+                     activeProvider === "gemini" ? "Gemini is analyzing at speed…" :
+                     activeProvider === "claude" ? "Claude is forecasting deeply…" :
+                     isElite ? "Routing across GPT · Gemini · Claude…" :
+                     isPro ? "Running advanced financial analysis…" :
+                     "Lumo AI is analyzing your finances…"}
                   </motion.span>
                 </div>
               </motion.div>
