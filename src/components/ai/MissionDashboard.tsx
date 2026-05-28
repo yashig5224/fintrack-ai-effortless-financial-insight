@@ -448,6 +448,9 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
     return pool[personaId] ?? ["Analyze my spending", "Create a budget plan", "How can I save more?"];
   };
 
+  // Provider used for the most recent / in-flight AI response.
+  const [activeProvider, setActiveProvider] = useState<string>("lumo");
+
   const sendMessage = async (text: string) => {
     // Free tier: enforce daily AI chat cap
     if (tier === "free") {
@@ -463,42 +466,45 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
     const history = [...messages, userMsg];
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
+    setActiveProvider(selectedModel);
 
     const libReply = findReply(text, persona.id);
 
-
     try {
-      const { data, error } = await supabase.functions.invoke("lumo-chat", {
+      const { data, error } = await supabase.functions.invoke("ai-router", {
         body: {
           message: text,
+          model: selectedModel,
           persona: { id: persona.id, name: persona.name },
           history: history.slice(-8).map((m) => ({ role: m.role, text: m.text })),
         },
       });
 
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
       const aiText: string =
-        !error && data?.text
-          ? data.text
-          : libReply?.text ??
-            `Let me think about "${text}" through your ${persona.name} lens and surface one concrete next step.`;
+        data?.text ||
+        libReply?.text ||
+        `Let me think about "${text}" through your ${persona.name} lens.`;
+
+      if (data?.provider) setActiveProvider(data.provider);
+      if (data?.fallbackUsed && data?.providerLabel) {
+        toast(`Routed via ${data.providerLabel} (fallback)`, { duration: 2500 });
+      }
 
       const id = nextId.current++;
       const aiMsg: Message = {
-        id,
-        role: "ai",
-        text: "",
-        fullText: aiText,
-        streaming: true,
-        insights: libReply?.insights,
-        chips: chipPool(persona.id),
+        id, role: "ai", text: "", fullText: aiText, streaming: true,
+        insights: libReply?.insights, chips: chipPool(persona.id),
       };
       setIsTyping(false);
       setMessages((prev) => [...prev, aiMsg]);
       streamInto(id, aiText);
-    } catch (e) {
-      console.error("Lumo AI error", e);
+    } catch (e: any) {
+      console.error("ai-router error", e);
       const id = nextId.current++;
-      const fallback = libReply?.text ?? "I hit a hiccup reaching the AI service. Try again in a moment.";
+      const fallback = libReply?.text ?? "I hit a hiccup reaching the AI engines. Try again in a moment.";
       setIsTyping(false);
       setMessages((prev) => [...prev, {
         id, role: "ai", text: "", fullText: fallback, streaming: true,
