@@ -15,6 +15,7 @@ import { useSubscription, type PlanTier } from "@/hooks/useSubscription";
 import { useAuth } from "@/contexts/AuthContext";
 import { UpgradeModal } from "@/components/payments/UpgradeModal";
 import { getAiUsage, consumeAiUsage, FREE_DAILY_LIMIT } from "@/lib/aiUsage";
+import LumoVoiceMode from "./LumoVoiceMode";
 
 // ─── Plan-gated AI model catalog ─────────────────────────────────────────────
 interface AiModelOption {
