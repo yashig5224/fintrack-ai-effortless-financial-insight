@@ -15,6 +15,7 @@ import { useSubscription, type PlanTier } from "@/hooks/useSubscription";
 import { useAuth } from "@/contexts/AuthContext";
 import { UpgradeModal } from "@/components/payments/UpgradeModal";
 import { getAiUsage, consumeAiUsage, FREE_DAILY_LIMIT } from "@/lib/aiUsage";
+import LumoVoiceMode from "./LumoVoiceMode";
 
 // ─── Plan-gated AI model catalog ─────────────────────────────────────────────
 interface AiModelOption {
@@ -408,6 +409,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
 
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const nextId = useRef(1);
 
@@ -1102,12 +1104,19 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
           ) : (
             <div className="glass-card bg-white/80 border-white p-2 rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center gap-2">
               <button
-                onClick={() => isElite ? toast("Voice AI coming online…") : openUpgrade(isPro ? "elite" : "pro", "Voice AI")}
-                className="w-12 h-12 flex items-center justify-center rounded-2xl text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors shrink-0 relative"
-                title={isElite ? "Voice AI" : "Voice AI — upgrade to unlock"}
+                onClick={() => {
+                  if (tier === "free") return openUpgrade("pro", "Voice AI");
+                  setVoiceOpen(true);
+                }}
+                className={`w-12 h-12 flex items-center justify-center rounded-2xl shrink-0 relative transition-all ${
+                  tier === "free"
+                    ? "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                    : "text-white bg-gradient-to-br from-indigo-600 to-violet-600 shadow-md hover:-translate-y-0.5"
+                }`}
+                title={tier === "free" ? "Voice AI — upgrade to unlock" : isElite ? "Lumo Voice — live conversation" : "Voice dictation"}
               >
                 <Mic className="w-6 h-6" />
-                {!isElite && <Lock className="absolute top-1.5 right-1.5 w-3 h-3 text-amber-500" />}
+                {tier === "free" && <Lock className="absolute top-1.5 right-1.5 w-3 h-3 text-amber-500" />}
               </button>
               <input
                 type="text"
@@ -1136,6 +1145,17 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
         onOpenChange={setUpgradeOpen}
         tier={upgradeTier}
         feature={upgradeFeature}
+      />
+
+      {/* Lumo Voice AI — full conversational voice assistant */}
+      <LumoVoiceMode
+        open={voiceOpen}
+        onClose={() => setVoiceOpen(false)}
+        tier={tier}
+        persona={{ id: persona.id, name: persona.name }}
+        selectedModel={selectedModel}
+        seedHistory={messages.slice(-6).map((m) => ({ role: m.role, text: m.fullText || m.text }))}
+        onTranscript={(text) => sendMessage(text)}
       />
     </motion.div>
 
