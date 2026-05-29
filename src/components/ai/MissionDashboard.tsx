@@ -1146,6 +1146,17 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
         tier={upgradeTier}
         feature={upgradeFeature}
       />
+
+      {/* Lumo Voice AI — full conversational voice assistant */}
+      <LumoVoiceMode
+        open={voiceOpen}
+        onClose={() => setVoiceOpen(false)}
+        tier={tier}
+        persona={{ id: persona.id, name: persona.name }}
+        selectedModel={selectedModel}
+        seedHistory={messages.slice(-6).map((m) => ({ role: m.role, text: m.fullText || m.text }))}
+        onTranscript={(text) => sendMessage(text)}
+      />
     </motion.div>
 
   );
