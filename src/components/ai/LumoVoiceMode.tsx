@@ -30,7 +30,23 @@ import { lumoAvatar } from "@/assets/personas";
 
 export type VoiceState = "idle" | "listening" | "processing" | "speaking" | "error";
 
-type RecognitionLike = any;
+type SpeechRecognitionResultLike = { isFinal: boolean; 0?: { transcript?: string } };
+type SpeechRecognitionEventLike = { resultIndex: number; results: { length: number; [index: number]: SpeechRecognitionResultLike } };
+type SpeechRecognitionErrorLike = { error?: string };
+type RecognitionLike = {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  maxAlternatives: number;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onspeechend: (() => void) | null;
+  onerror: ((event: SpeechRecognitionErrorLike) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort?: () => void;
+};
 type VoiceRole = "user" | "ai";
 
 type Turn = {
@@ -124,7 +140,11 @@ function secondsToLabel(seconds: number) {
 
 function getRecognition(): RecognitionLike | null {
   if (typeof window === "undefined") return null;
-  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+  const speechWindow = window as Window & {
+    SpeechRecognition?: new () => RecognitionLike;
+    webkitSpeechRecognition?: new () => RecognitionLike;
+  };
+  const SpeechRecognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
   if (!SpeechRecognition) return null;
   const recognition = new SpeechRecognition();
   recognition.lang = "en-US";
