@@ -295,10 +295,9 @@ const LumoVoiceMode = ({ open, onClose, tier, persona, selectedModel, onTranscri
     return { label: "Tap to speak", caption: isElite ? "Start a live financial conversation." : "Use your Pro voice minutes with Lumo.", helper: continuousMode ? "Continuous Conversation is on." : "Ask about budgets, spending, goals, or investments." };
   }, [canUseVoice, voiceState, partialTranscript, finalTranscript, routerMeta.providerLabel, voiceError, isElite, continuousMode]);
 
-  const voices = useMemo(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return [] as SpeechSynthesisVoice[];
-    return window.speechSynthesis.getVoices().filter((voice) => /en/i.test(voice.lang));
-  }, [voicesReady]);
+  const voices = typeof window !== "undefined" && window.speechSynthesis
+    ? window.speechSynthesis.getVoices().filter((voice) => /en/i.test(voice.lang))
+    : [];
 
   const cleanupMic = useCallback(() => {
     if (visualizerFrameRef.current) cancelAnimationFrame(visualizerFrameRef.current);
