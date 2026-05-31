@@ -242,7 +242,36 @@ const UserApp = () => {
                   />
                 )}
                 {tab === "reports" && (
-                  <Reports transactions={transactions} categoryData={categoryData} trendData={trendData} stats={stats} currency={currency} />
+                  <Reports
+                    transactions={transactions}
+                    categoryData={categoryData}
+                    trendData={trendData}
+                    stats={stats}
+                    currency={currency}
+                    tier={tier}
+                    profile={profile}
+                    goals={goals}
+                    onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")}
+                  />
+                )}
+                {tab === "automation" && (
+                  <AutomationCenter
+                    transactions={transactions}
+                    income={stats.income}
+                    expenses={stats.expenses}
+                    currency={currency}
+                    tier={tier}
+                    onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")}
+                    onCreateGoal={async (name, amount) => {
+                      if (!user) return;
+                      const { data: inserted, error } = await supabase.from("goals").insert({
+                        user_id: user.id, goal_name: name, target_amount: amount, current_amount: 0, category: "AI Suggested",
+                      }).select().single();
+                      if (error) { toast.error(error.message); return; }
+                      setGoals(prev => [inserted as Goal, ...prev]);
+                      toast.success(`Goal "${name}" created`);
+                    }}
+                  />
                 )}
                 {tab === "settings" && (
                   <SettingsPanel profile={profile} onSaved={refreshProfile} onSignOut={handleSignOut} />
