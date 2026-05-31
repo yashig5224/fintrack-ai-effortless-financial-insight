@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, Receipt, Target, BarChart3, Settings, Plus, LogOut, Sparkles,
-  TrendingUp, TrendingDown, Wallet, Trash2, X, Trophy, Brain
+  TrendingUp, TrendingDown, Wallet, Trash2, X, Trophy, Brain, Zap
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip,
@@ -16,8 +16,10 @@ import { getCategoryIcon, NAV_ICONS } from "@/assets/icons";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/payments/UpgradeModal";
 import { Crown } from "lucide-react";
+import { ExportCenter } from "@/components/reports/ExportCenter";
+import { AutomationCenter } from "@/components/automation/AutomationCenter";
 
-type Tab = "overview" | "transactions" | "goals" | "reports" | "settings";
+type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
 interface Tx {
   id: string;
@@ -150,6 +152,10 @@ const UserApp = () => {
               {tab === id && <span className="absolute right-3 w-1.5 h-1.5 rounded-full bg-cyan-500" />}
             </button>
           ))}
+          <button onClick={() => setTab("automation")} className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all relative ${tab === "automation" ? "bg-gradient-to-r from-violet-100 via-fuchsia-50 to-purple-50 text-gray-900 shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}>
+            <Zap className="w-4 h-4 text-violet-500" /> Automation
+            <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white">AI</span>
+          </button>
           <button onClick={() => setTab("settings")} className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${tab === "settings" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-50"}`}>
             <Settings className="w-4 h-4" /> Settings
           </button>
@@ -236,7 +242,36 @@ const UserApp = () => {
                   />
                 )}
                 {tab === "reports" && (
-                  <Reports transactions={transactions} categoryData={categoryData} trendData={trendData} stats={stats} currency={currency} />
+                  <Reports
+                    transactions={transactions}
+                    categoryData={categoryData}
+                    trendData={trendData}
+                    stats={stats}
+                    currency={currency}
+                    tier={tier}
+                    profile={profile}
+                    goals={goals}
+                    onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")}
+                  />
+                )}
+                {tab === "automation" && (
+                  <AutomationCenter
+                    transactions={transactions}
+                    income={stats.income}
+                    expenses={stats.expenses}
+                    currency={currency}
+                    tier={tier}
+                    onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")}
+                    onCreateGoal={async (name, amount) => {
+                      if (!user) return;
+                      const { data: inserted, error } = await supabase.from("goals").insert({
+                        user_id: user.id, goal_name: name, target_amount: amount, current_amount: 0, category: "AI Suggested",
+                      }).select().single();
+                      if (error) { toast.error(error.message); return; }
+                      setGoals(prev => [inserted as Goal, ...prev]);
+                      toast.success(`Goal "${name}" created`);
+                    }}
+                  />
                 )}
                 {tab === "settings" && (
                   <SettingsPanel profile={profile} onSaved={refreshProfile} onSignOut={handleSignOut} />
@@ -496,7 +531,7 @@ const Goals = ({ goals, onAdd, onDelete, onContribute, currency }: any) => (
   </div>
 );
 
-const Reports = ({ transactions, categoryData, trendData, stats, currency }: any) => (
+const Reports = ({ transactions, categoryData, trendData, stats, currency, tier, profile, goals, onUpgrade }: any) => (
   <div className="space-y-6">
     <h2 className="font-display text-xl font-bold text-gray-900">Reports & Analytics</h2>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -545,6 +580,20 @@ const Reports = ({ transactions, categoryData, trendData, stats, currency }: any
         <li>• Top category: <strong>{categoryData[0]?.name || "—"}</strong></li>
       </ul>
     </div>
+    <ExportCenter
+      baseInput={{
+        userName: profile?.full_name || "Friend",
+        currency,
+        monthlyIncome: Number(profile?.monthly_income || 0),
+        transactions,
+        goals,
+        stats,
+        categoryData,
+        trendData,
+        tier,
+      }}
+      onUpgrade={onUpgrade}
+    />
   </div>
 );
 
