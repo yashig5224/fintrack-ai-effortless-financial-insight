@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, Receipt, Target, BarChart3, Settings, Plus, LogOut, Sparkles,
-  TrendingUp, TrendingDown, Wallet, Trash2, X, Trophy, Brain
+  TrendingUp, TrendingDown, Wallet, Trash2, X, Trophy, Brain, Zap
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip,
@@ -16,8 +16,10 @@ import { getCategoryIcon, NAV_ICONS } from "@/assets/icons";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/payments/UpgradeModal";
 import { Crown } from "lucide-react";
+import { ExportCenter } from "@/components/reports/ExportCenter";
+import { AutomationCenter } from "@/components/automation/AutomationCenter";
 
-type Tab = "overview" | "transactions" | "goals" | "reports" | "settings";
+type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
 interface Tx {
   id: string;
