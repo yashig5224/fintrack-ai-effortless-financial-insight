@@ -262,7 +262,7 @@ export async function runAutomationEngine(rules: AutomationRule[], ctx: EngineCo
     });
   }
   if (newLogs.length === 0) return [];
-  const { data, error } = await supabase.from("automation_logs").insert(newLogs).select();
+  const { data, error } = await supabase.from("automation_logs").insert(newLogs as never).select();
   if (error) throw error;
   // Update rule trigger counts
   for (const log of newLogs) {
