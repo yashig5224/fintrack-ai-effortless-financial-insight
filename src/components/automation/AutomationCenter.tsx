@@ -318,7 +318,7 @@ const BuilderModal = ({ onClose, onCreated, userId }: { onClose: () => void; onC
     setSaving(true);
     const { error } = await supabase.from("automation_rules").insert({
       user_id: userId, name, description: `Custom: ${conditionType} → ${actionType}`,
-      condition_type: conditionType, condition_config: condCfg(),
+      condition_type: conditionType, condition_config: condCfg() as never,
       action_type: actionType, action_config: { message: name }, tier: "pro",
     });
     setSaving(false);
