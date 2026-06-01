@@ -188,8 +188,8 @@ const PrebuiltPanel = ({ installed, tier, onUpgrade, reload }: { installed: Auto
     if (p.tier === "elite" && tier !== "elite") { onUpgrade(); return; }
     const { error } = await supabase.from("automation_rules").insert({
       user_id: user.id, name: p.name, description: p.description, is_prebuilt: true, prebuilt_key: p.key,
-      condition_type: p.condition_type, condition_config: p.condition_config,
-      action_type: p.action_type, action_config: p.action_config, tier: p.tier,
+      condition_type: p.condition_type, condition_config: p.condition_config as never,
+      action_type: p.action_type, action_config: p.action_config as never, tier: p.tier,
     });
     if (error) { toast.error(error.message); return; }
     toast.success(`${p.name} installed`);
