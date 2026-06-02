@@ -43,6 +43,14 @@ interface Goal {
   category: string | null;
 }
 
+interface Budget {
+  id: string;
+  category: string;
+  monthly_limit: number;
+  spent_amount: number;
+  month: string;
+}
+
 const CATEGORIES = ["Food", "Shopping", "Travel", "Bills", "Entertainment", "Health", "Education", "Salary", "Investment", "Other"];
 const CATEGORY_COLORS: Record<string, string> = {
   Food: "#f59e0b", Shopping: "#ec4899", Travel: "#3b82f6", Bills: "#8b5cf6",
