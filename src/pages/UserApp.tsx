@@ -18,6 +18,7 @@ import { UpgradeModal } from "@/components/payments/UpgradeModal";
 import { Crown } from "lucide-react";
 import { ExportCenter } from "@/components/reports/ExportCenter";
 import { AutomationCenter } from "@/components/automation/AutomationCenter";
+import CommandCenter from "@/components/dashboard/CommandCenter";
 
 type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
