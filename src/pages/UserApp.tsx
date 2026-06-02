@@ -358,7 +358,7 @@ const StatCard = ({ label, value, change, positive, Icon }: { label: string; val
   </motion.div>
 );
 
-const Overview = ({ stats, insights, trendData, categoryData, currency, persona, tier, onUpgrade }: any) => (
+const Overview = ({ stats, currency, persona, tier, onUpgrade, transactions, goals, budgets, monthlyIncome }: any) => (
   <div className="space-y-6">
     {tier !== "elite" && (
       <motion.button
@@ -400,63 +400,17 @@ const Overview = ({ stats, insights, trendData, categoryData, currency, persona,
       <StatCard label="Savings Rate" value={`${stats.savingsRate}%`} Icon={Trophy} positive={stats.savingsRate >= 30} change={stats.savingsRate >= 30 ? "Above target" : "Push for 30%"} />
     </div>
 
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <div className="glass-card bg-white border border-gray-100 rounded-3xl p-6 lg:col-span-2 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-display text-lg font-bold text-gray-900">7-Day Cashflow</h3>
-        </div>
-        <div className="h-56">
-          <ResponsiveContainer>
-            <AreaChart data={trendData}>
-              <defs>
-                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity={0.4} /><stop offset="100%" stopColor="#22c55e" stopOpacity={0} /></linearGradient>
-                <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ef4444" stopOpacity={0.4} /><stop offset="100%" stopColor="#ef4444" stopOpacity={0} /></linearGradient>
-              </defs>
-              <XAxis dataKey="name" stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis hide />
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #f1f5f9" }} />
-              <Area type="monotone" dataKey="income" stroke="#22c55e" fill="url(#g1)" strokeWidth={2} />
-              <Area type="monotone" dataKey="expense" stroke="#ef4444" fill="url(#g2)" strokeWidth={2} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+    <CommandCenter
+      transactions={transactions}
+      goals={goals}
+      budgets={budgets}
+      currency={currency}
+      monthlyIncome={monthlyIncome}
+    />
 
-      <div className="glass-card bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
-        <h3 className="font-display text-lg font-bold text-gray-900 mb-4">Spending Mix</h3>
-        {categoryData.length === 0 ? (
-          <p className="text-sm text-gray-400">Add expenses to see your breakdown.</p>
-        ) : (
-          <div className="h-56">
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie data={categoryData} dataKey="value" innerRadius={50} outerRadius={80} paddingAngle={3}>
-                  {categoryData.map((c: any, i: number) => <Cell key={i} fill={CATEGORY_COLORS[c.name] || "#94a3b8"} />)}
-                </Pie>
-                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #f1f5f9" }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </div>
-    </div>
-
-    <div className="glass-card bg-gradient-to-br from-blue-50/60 to-white border border-blue-100 rounded-3xl p-6 shadow-sm">
-      <div className="flex items-center gap-2 mb-3">
-        <Brain className="w-5 h-5 text-blue-600" />
-        <h3 className="font-display text-lg font-bold text-gray-900">AI Insights</h3>
-      </div>
-      <ul className="space-y-2">
-        {insights.map((i: string, idx: number) => (
-          <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />{i}
-          </li>
-        ))}
-      </ul>
-      <Link to="/coach" className="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-blue-600 hover:text-blue-700">
-        Talk to Lumo AI <Sparkles className="w-3.5 h-3.5" />
-      </Link>
-    </div>
+    <Link to="/coach" className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700">
+      Talk to Lumo AI for deeper analysis <Sparkles className="w-3.5 h-3.5" />
+    </Link>
   </div>
 );
 
