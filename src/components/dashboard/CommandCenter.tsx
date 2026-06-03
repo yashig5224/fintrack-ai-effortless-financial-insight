@@ -13,6 +13,8 @@ import {
   AlertTriangle, Sparkles, Brain, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { getCategoryIcon } from "@/assets/icons";
+import HealthScoreWidget from "./HealthScoreWidget";
+import ForecastWidget from "./ForecastWidget";
 
 export interface Tx {
   id: string;
