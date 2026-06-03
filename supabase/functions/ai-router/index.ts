@@ -247,6 +247,27 @@ function renderSnapshot(s: FinancialSnapshot): string {
   if (s.monthlyIncome) lines.push(`- Declared monthly income: ${inr(s.monthlyIncome)}`);
   lines.push(`- Last 30d income: ${inr(s.income30)} | expenses: ${inr(s.expense30)} | net savings: ${inr(s.savings30)} (rate ${s.savingsRate.toFixed(1)}%)`);
 
+  // Phase 4 — Financial Health Score
+  const savingsRateScore = s.income30 > 0
+    ? Math.max(0, Math.min(100, ((s.income30 - s.expense30) / s.income30) * 100 * 4 + 30))
+    : 40;
+  const budgetUsedScore = s.budgets.length
+    ? (s.budgets.filter((b) => b.usage <= 100).length / s.budgets.length) * 100
+    : 60;
+  const goalAvg = s.goals.length ? s.goals.reduce((a, g) => a + g.pct, 0) / s.goals.length : 50;
+  const subPct = s.income30 > 0
+    ? Math.min(100, (s.subscriptions.reduce((a, x) => a + x.amount, 0) / s.income30) * 100)
+    : 0;
+  const subScore = Math.max(20, 100 - subPct * 3);
+  const healthOverall = Math.round(savingsRateScore * 0.35 + budgetUsedScore * 0.2 + goalAvg * 0.2 + subScore * 0.25);
+  const healthGrade = healthOverall >= 85 ? "Excellent" : healthOverall >= 70 ? "Good" : healthOverall >= 50 ? "Fair" : "Poor";
+  lines.push(`- Financial Health Score: ${healthOverall}/100 (${healthGrade})`);
+
+  // Phase 5 — Forecast (30 days ahead, baseline = last 30d)
+  const nextSpendForecast = s.expense30;
+  const nextSavingsForecast = s.income30 - s.expense30;
+  lines.push(`- 30d forecast: spending ~${inr(nextSpendForecast)}, savings ~${inr(nextSavingsForecast)}`);
+
   if (s.topCategories.length) {
     lines.push("- Top spend categories (30d):");
     for (const c of s.topCategories) lines.push(`   • ${c.category}: ${inr(c.spent)} (${c.pct.toFixed(0)}% of spend)`);

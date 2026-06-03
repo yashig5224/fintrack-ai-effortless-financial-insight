@@ -13,6 +13,8 @@ import {
   AlertTriangle, Sparkles, Brain, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { getCategoryIcon } from "@/assets/icons";
+import HealthScoreWidget from "./HealthScoreWidget";
+import ForecastWidget from "./ForecastWidget";
 
 export interface Tx {
   id: string;
@@ -619,6 +621,12 @@ const CommandCenter: React.FC<Props> = ({ transactions, goals, budgets, currency
           <CashflowCenter transactions={transactions} currency={currency} />
         </div>
         <RecentTransactions transactions={transactions} currency={currency} />
+      </div>
+
+      {/* Phase 4 + Phase 5 — Health Score & Forecast */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <HealthScoreWidget transactions={transactions} goals={goals} budgets={budgets} />
+        <ForecastWidget transactions={transactions} goals={goals} currency={currency} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
