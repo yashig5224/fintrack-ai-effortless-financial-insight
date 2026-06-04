@@ -19,6 +19,7 @@ import { Crown } from "lucide-react";
 import { ExportCenter } from "@/components/reports/ExportCenter";
 import { AutomationCenter } from "@/components/automation/AutomationCenter";
 import CommandCenter from "@/components/dashboard/CommandCenter";
+import NotificationCenter from "@/components/notifications/NotificationCenter";
 
 type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
@@ -198,6 +199,7 @@ const UserApp = () => {
               <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900">{profile?.full_name || "Friend"} 👋</h1>
             </div>
             <div className="flex items-center gap-2">
+              <NotificationCenter scanData={{ transactions, goals, budgets }} />
               <div className="px-3 py-1.5 rounded-full bg-white border border-gray-100 text-xs font-semibold text-gray-700 shadow-sm">
                 Lvl {profile?.level ?? 1} • {profile?.xp ?? 0} XP
               </div>
