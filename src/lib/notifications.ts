@@ -55,7 +55,7 @@ export async function createNotification(input: {
   const meta = dedupeKey ? { ...metadata, dedupeKey } : metadata;
   const { data, error } = await supabase
     .from("notifications")
-    .insert({ user_id: userId, type, title, message, severity, link: link || null, metadata: meta })
+    .insert({ user_id: userId, type, title, message, severity, link: link || null, metadata: meta as never })
     .select()
     .single();
   if (error) {
