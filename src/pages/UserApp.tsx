@@ -19,6 +19,7 @@ import { Crown } from "lucide-react";
 import { ExportCenter } from "@/components/reports/ExportCenter";
 import { AutomationCenter } from "@/components/automation/AutomationCenter";
 import CommandCenter from "@/components/dashboard/CommandCenter";
+import NotificationCenter from "@/components/notifications/NotificationCenter";
 
 type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
@@ -198,6 +199,7 @@ const UserApp = () => {
               <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900">{profile?.full_name || "Friend"} 👋</h1>
             </div>
             <div className="flex items-center gap-2">
+              <NotificationCenter scanData={{ transactions, goals, budgets }} />
               <div className="px-3 py-1.5 rounded-full bg-white border border-gray-100 text-xs font-semibold text-gray-700 shadow-sm">
                 Lvl {profile?.level ?? 1} • {profile?.xp ?? 0} XP
               </div>
@@ -263,6 +265,8 @@ const UserApp = () => {
                     tier={tier}
                     profile={profile}
                     goals={goals}
+                    budgets={budgets}
+                    userId={user?.id}
                     onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")}
                   />
                 )}
@@ -497,7 +501,7 @@ const Goals = ({ goals, onAdd, onDelete, onContribute, currency }: any) => (
   </div>
 );
 
-const Reports = ({ transactions, categoryData, trendData, stats, currency, tier, profile, goals, onUpgrade }: any) => (
+const Reports = ({ transactions, categoryData, trendData, stats, currency, tier, profile, goals, budgets, userId, onUpgrade }: any) => (
   <div className="space-y-6">
     <h2 className="font-display text-xl font-bold text-gray-900">Reports & Analytics</h2>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -549,10 +553,12 @@ const Reports = ({ transactions, categoryData, trendData, stats, currency, tier,
     <ExportCenter
       baseInput={{
         userName: profile?.full_name || "Friend",
+        userId,
         currency,
         monthlyIncome: Number(profile?.monthly_income || 0),
         transactions,
         goals,
+        budgets,
         stats,
         categoryData,
         trendData,
