@@ -499,7 +499,7 @@ const Goals = ({ goals, onAdd, onDelete, onContribute, currency }: any) => (
   </div>
 );
 
-const Reports = ({ transactions, categoryData, trendData, stats, currency, tier, profile, goals, onUpgrade }: any) => (
+const Reports = ({ transactions, categoryData, trendData, stats, currency, tier, profile, goals, budgets, userId, onUpgrade }: any) => (
   <div className="space-y-6">
     <h2 className="font-display text-xl font-bold text-gray-900">Reports & Analytics</h2>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -551,10 +551,12 @@ const Reports = ({ transactions, categoryData, trendData, stats, currency, tier,
     <ExportCenter
       baseInput={{
         userName: profile?.full_name || "Friend",
+        userId,
         currency,
         monthlyIncome: Number(profile?.monthly_income || 0),
         transactions,
         goals,
+        budgets,
         stats,
         categoryData,
         trendData,
