@@ -194,19 +194,19 @@ function pageFooter(d: Doc) {
     d.setDrawColor(...LINE);
     d.setLineWidth(0.3);
     d.line(20, H(d) - 24, W(d) - 20, H(d) - 24);
-    d.setFontSize(7);
+    d.setFontSize(8.5););););
     d.setFont("helvetica", "normal");
     d.setTextColor(...MUTED);
     d.text("FinTrack AI · Confidential financial intelligence", 20, H(d) - 14);
     d.text(`Page ${i} of ${total}`, W(d) - 20, H(d) - 14, { align: "right" });
     // tiny brand dot
     d.setFillColor(...PRIMARY);
-    d.circle(W(d) / 2, H(d) - 16, 1.2, "F");
+    d.circle(W(d)/2,H(d)-16,1.8,"F");
   }
 }
 
 function sectionLabel(d: Doc, kicker: string, title: string, y: number) {
-  d.setFontSize(7);
+  d.setFontSize(8.5);
   d.setFont("helvetica", "bold");
   d.setTextColor(...PRIMARY);
   d.text(kicker.toUpperCase(), 20, y);
@@ -373,7 +373,7 @@ function areaChart(
   // legend
   d.setFillColor(...color);
   d.circle(x + 14, y + 10, 1.6, "F");
-  d.setFontSize(7);
+  d.setFontSize(8.5);
   d.setTextColor(...MUTED);
   d.text(label, x + 18, y + 12);
 }
@@ -415,7 +415,7 @@ function multiLine(
   series.forEach((s) => {
     d.setFillColor(...s.color);
     d.circle(lx, y + 10, 1.6, "F");
-    d.setFontSize(7);
+    d.setFontSize(8.5);
     d.setTextColor(...MUTED);
     d.text(s.label, lx + 4, y + 12);
     lx += d.getTextWidth(s.label) + 16;
@@ -456,7 +456,7 @@ function dualBars(
   });
   d.setFillColor(...GOOD);
   d.circle(x + 14, y + 10, 1.6, "F");
-  d.setFontSize(7);
+  d.setFontSize(8.5);
   d.setTextColor(...MUTED);
   d.text("Income", x + 18, y + 12);
   d.setFillColor(...BAD);
@@ -741,14 +741,14 @@ function pageCover(doc: Doc, input: ReportInput, score: number, grade: string) {
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...PAPER);
   const lines = doc.splitTextToSize(titleFor(input.kind), W(doc) - 80);
-  doc.text(lines, 40, 230);
+  doc.text(lines, 40, 190);
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(230, 230, 255);
-  paragraph(doc, 40, 270, W(doc) - 80, subtitleFor(input.kind), { size: 11, color: [230, 230, 255] });
+  paragraph(doc, 40, 230, W(doc) - 80, subtitleFor(input.kind), { size: 11, color: [230, 230, 255] });
 
   // meta card
-  const cy = 330;
+  const cy = 280;
   doc.setFillColor(...PAPER);
   doc.roundedRect(40, cy, W(doc) - 80, 130, 12, 12, "F");
   const half = (W(doc) - 80) / 2;
@@ -777,7 +777,7 @@ function pageCover(doc: Doc, input: ReportInput, score: number, grade: string) {
   });
 
   // health gauge card
-  const by = 490;
+  const by = 430;
   doc.setFillColor(...PAPER);
   doc.roundedRect(40, by, W(doc) - 80, 170, 12, 12, "F");
   doc.setFontSize(8);
@@ -822,7 +822,7 @@ function pageHealthBreakdown(
     "How your score is calculated across 8 weighted factors.",
     input.tier,
   );
-  let y = 110;
+  let y = 92;
   // hero panel with gauge
   panel(doc, 20, y, W(doc) - 40, 130);
   scoreGauge(doc, 90, y + 70, 44, hs.score, hs.grade);
@@ -933,7 +933,7 @@ function pageExecutiveSummary(
   period: ReturnType<typeof periodCompare>,
 ) {
   brandedHeader(doc, "Executive Summary", "AI-written financial analysis based on your actual data.", input.tier);
-  let y = 110;
+  let y = 92;
   y = kpiRow(doc, y, [
     {
       label: "Income",
@@ -1072,7 +1072,7 @@ function pageCashflow(doc: Doc, input: ReportInput) {
     "Income, expenses and savings momentum across multiple horizons.",
     input.tier,
   );
-  let y = 110;
+  let y = 92;
   const weekly = weeklyTrend(input.transactions, 8);
   const monthly = monthlyTrend(input.transactions, 6);
   const quarterly = quarterlyTrend(input.transactions, 4);
@@ -1085,7 +1085,7 @@ function pageCashflow(doc: Doc, input: ReportInput) {
     22,
     y + 18,
     W(doc) - 44,
-    118,
+    150,
     monthly.map((m) => m.savings),
     monthly.map((m) => m.name),
     GOOD,
@@ -1101,7 +1101,7 @@ function pageCashflow(doc: Doc, input: ReportInput) {
     22,
     y + 16,
     hw - 4,
-    110,
+    140,
     [{ color: PRIMARY, label: "Net Cashflow", values: weekly.map((w) => w.net) }],
     weekly.map((w) => w.name),
   );
@@ -1111,7 +1111,7 @@ function pageCashflow(doc: Doc, input: ReportInput) {
     32 + hw,
     y + 16,
     hw - 4,
-    110,
+    140,
     quarterly.map((q) => ({ label: q.name, income: q.income, expense: q.expense })),
   );
   y += 142;
@@ -1126,7 +1126,7 @@ function pageCashflow(doc: Doc, input: ReportInput) {
     88,
     yearly.map((yr) => ({ label: yr.name, income: yr.income, expense: yr.expense })),
   );
-  y += 122;
+  y += 157;
 
   // narrative
   const lastSav = monthly[monthly.length - 1]?.savings || 0;
@@ -1151,7 +1151,7 @@ function pageCategoryIntel(doc: Doc, input: ReportInput) {
     "Where every unit of currency flows, with trends and budget variance.",
     input.tier,
   );
-  let y = 110;
+  let y = 92;
   const items = [...input.categoryData].sort((a, b) => b.value - a.value);
   const total = items.reduce((s, d) => s + d.value, 0) || 1;
   const deltas = categoryDelta(input.transactions);
@@ -1276,9 +1276,9 @@ function pageGoalIntel(doc: Doc, input: ReportInput) {
     "Realistic ETAs, required contributions and completion probability.",
     input.tier,
   );
-  let y = 110;
+  let y = 92;
   if (input.goals.length === 0) {
-    panel(doc, 20, y, W(doc) - 40, 100, "No Goals Defined");
+    panel(doc, 20, y, W(doc) - 40, 145, "No Goals Defined");
     paragraph(
       doc,
       30,
@@ -1381,7 +1381,7 @@ function pageGoalIntel(doc: Doc, input: ReportInput) {
       doc.setTextColor(...INK);
       doc.text(v, mx + colW * i, my + 14);
     });
-    y += 122;
+    y += 157;
   });
 }
 
@@ -1398,7 +1398,7 @@ function pageTransactionIntel(doc: Doc, input: ReportInput) {
     "Top transactions, merchant trends, recurring patterns and subscriptions.",
     input.tier,
   );
-  let y = 110;
+  let y = 92;
 
   const expenseTx = input.transactions.filter((t) => t.type !== "income");
   const top10 = [...expenseTx].sort((a, b) => Number(b.amount) - Number(a.amount)).slice(0, 10);
@@ -1508,7 +1508,7 @@ function pageTransactionIntel(doc: Doc, input: ReportInput) {
 
 function pageForecast(doc: Doc, input: ReportInput) {
   brandedHeader(doc, "Forecast Engine", "30-day · 90-day · 12-month forward projections.", input.tier);
-  let y = 110;
+  let y = 92;
   const fc = computeForecast({ transactions: input.transactions as never, goals: input.goals as never });
   const m6 = monthlyTrend(input.transactions, 6);
   const avgInc = m6.reduce((s, m) => s + m.income, 0) / Math.max(1, m6.length);
@@ -1627,7 +1627,7 @@ async function pageCoachIntel(doc: Doc, input: ReportInput) {
     "Topics, key insights and engagement metrics from your conversations with Lumo.",
     input.tier,
   );
-  let y = 110;
+  let y = 92;
   let history: { message: string; ai_response: string | null; created_at: string; persona: string | null }[] = [];
   let autoLogs: { action_taken: string; rule_name: string; amount_saved: number | null; created_at: string }[] = [];
   if (input.userId) {
@@ -1813,7 +1813,7 @@ function pageActionPlan(doc: Doc, input: ReportInput, score: number) {
     "Prioritized roadmap for the next 90 days, derived from your data.",
     input.tier,
   );
-  let y = 110;
+  let y = 92;
   const subs = detectSubs(input.transactions);
   const subTotal = subs.reduce((s, x) => s + x.amount, 0);
   const top = [...input.categoryData].sort((a, b) => b.value - a.value)[0];
