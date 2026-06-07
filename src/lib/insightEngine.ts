@@ -231,12 +231,12 @@ export function generateInsights(opts: {
 
   // Health
   try {
-    const hs = computeFinancialHealth({ transactions, goals, budgets, monthlyIncome });
+    const hs = computeHealthScore({ transactions, goals, budgets });
     if (hs && hs.score < 50) {
       out.push({
         id: newId("h"), timeframe: "monthly", category: "health", severity: "warning",
         title: `Financial health at ${hs.score}/100 (Grade ${hs.grade})`,
-        body: `Focus on the weakest pillar to lift your score. Top opportunity: ${hs.recommendations?.[0] || "increase savings rate"}.`,
+        body: `Focus on the weakest pillar to lift your score. Top opportunity: ${(hs as any).recommendations?.[0] || "increase savings rate"}.`,
         createdAt: new Date().toISOString(),
       });
     } else if (hs && hs.score >= 80) {
