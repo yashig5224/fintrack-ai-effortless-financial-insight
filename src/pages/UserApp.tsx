@@ -20,6 +20,8 @@ import { ExportCenter } from "@/components/reports/ExportCenter";
 import { AutomationCenter } from "@/components/automation/AutomationCenter";
 import CommandCenter from "@/components/dashboard/CommandCenter";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
+import GoalIntelligencePanel from "@/components/dashboard/GoalIntelligencePanel";
+import InsightFeed from "@/components/dashboard/InsightFeed";
 
 type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
@@ -223,7 +225,10 @@ const UserApp = () => {
             <AnimatePresence mode="wait">
               <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
                 {tab === "overview" && (
-                  <Overview stats={stats} insights={insights} trendData={trendData} categoryData={categoryData} currency={currency} persona={profile?.selected_persona} tier={tier} onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")} transactions={transactions} goals={goals} budgets={budgets} monthlyIncome={Number(profile?.monthly_income || 0)} />
+                  <div className="space-y-6">
+                    <Overview stats={stats} insights={insights} trendData={trendData} categoryData={categoryData} currency={currency} persona={profile?.selected_persona} tier={tier} onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")} transactions={transactions} goals={goals} budgets={budgets} monthlyIncome={Number(profile?.monthly_income || 0)} />
+                    <InsightFeed transactions={transactions} goals={goals} budgets={budgets} monthlyIncome={Number(profile?.monthly_income || 0)} />
+                  </div>
                 )}
                 {tab === "transactions" && (
                   <Transactions
@@ -238,37 +243,57 @@ const UserApp = () => {
                   />
                 )}
                 {tab === "goals" && (
-                  <Goals
-                    goals={goals}
-                    onAdd={() => setShowGoalForm(true)}
-                    onDelete={async (id) => {
-                      await supabase.from("goals").delete().eq("id", id);
-                      setGoals(prev => prev.filter(g => g.id !== id));
-                    }}
-                    onContribute={async (id, amount) => {
-                      const g = goals.find(x => x.id === id); if (!g) return;
-                      const newAmt = Math.min(Number(g.target_amount), Number(g.current_amount) + amount);
-                      await supabase.from("goals").update({ current_amount: newAmt }).eq("id", id);
-                      setGoals(prev => prev.map(x => x.id === id ? { ...x, current_amount: newAmt } : x));
-                      toast.success("Contribution added");
-                    }}
-                    currency={currency}
-                  />
+                  <div className="space-y-6">
+                    <Goals
+                      goals={goals}
+                      onAdd={() => setShowGoalForm(true)}
+                      onDelete={async (id) => {
+                        await supabase.from("goals").delete().eq("id", id);
+                        setGoals(prev => prev.filter(g => g.id !== id));
+                      }}
+                      onContribute={async (id, amount) => {
+                        const g = goals.find(x => x.id === id); if (!g) return;
+                        const newAmt = Math.min(Number(g.target_amount), Number(g.current_amount) + amount);
+                        await supabase.from("goals").update({ current_amount: newAmt }).eq("id", id);
+                        setGoals(prev => prev.map(x => x.id === id ? { ...x, current_amount: newAmt } : x));
+                        toast.success("Contribution added");
+                      }}
+                      currency={currency}
+                    />
+                    {goals.length > 0 && (
+                      <GoalIntelligencePanel
+                        transactions={transactions}
+                        goals={goals}
+                        currency={currency}
+                        onContribute={async (id, amount) => {
+                          const g = goals.find(x => x.id === id); if (!g) return;
+                          const newAmt = Math.min(Number(g.target_amount), Number(g.current_amount) + amount);
+                          await supabase.from("goals").update({ current_amount: newAmt }).eq("id", id);
+                          setGoals(prev => prev.map(x => x.id === id ? { ...x, current_amount: newAmt } : x));
+                          toast.success("Contribution added");
+                        }}
+                      />
+                    )}
+                  </div>
                 )}
                 {tab === "reports" && (
-                  <Reports
-                    transactions={transactions}
-                    categoryData={categoryData}
-                    trendData={trendData}
-                    stats={stats}
-                    currency={currency}
-                    tier={tier}
-                    profile={profile}
-                    goals={goals}
-                    budgets={budgets}
-                    userId={user?.id}
-                    onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")}
-                  />
+                  <div className="space-y-6">
+                    <Reports
+                      transactions={transactions}
+                      categoryData={categoryData}
+                      trendData={trendData}
+                      stats={stats}
+                      currency={currency}
+                      tier={tier}
+                      profile={profile}
+                      goals={goals}
+                      budgets={budgets}
+                      userId={user?.id}
+                      onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")}
+                    />
+                    <GoalIntelligencePanel transactions={transactions} goals={goals} currency={currency} />
+                    <InsightFeed transactions={transactions} goals={goals} budgets={budgets} monthlyIncome={Number(profile?.monthly_income || 0)} />
+                  </div>
                 )}
                 {tab === "automation" && (
                   <AutomationCenter
