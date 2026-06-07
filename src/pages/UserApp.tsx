@@ -20,6 +20,8 @@ import { ExportCenter } from "@/components/reports/ExportCenter";
 import { AutomationCenter } from "@/components/automation/AutomationCenter";
 import CommandCenter from "@/components/dashboard/CommandCenter";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
+import GoalIntelligencePanel from "@/components/dashboard/GoalIntelligencePanel";
+import InsightFeed from "@/components/dashboard/InsightFeed";
 
 type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
