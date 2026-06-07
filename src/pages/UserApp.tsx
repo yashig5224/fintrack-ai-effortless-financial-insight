@@ -277,19 +277,23 @@ const UserApp = () => {
                   </div>
                 )}
                 {tab === "reports" && (
-                  <Reports
-                    transactions={transactions}
-                    categoryData={categoryData}
-                    trendData={trendData}
-                    stats={stats}
-                    currency={currency}
-                    tier={tier}
-                    profile={profile}
-                    goals={goals}
-                    budgets={budgets}
-                    userId={user?.id}
-                    onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")}
-                  />
+                  <div className="space-y-6">
+                    <Reports
+                      transactions={transactions}
+                      categoryData={categoryData}
+                      trendData={trendData}
+                      stats={stats}
+                      currency={currency}
+                      tier={tier}
+                      profile={profile}
+                      goals={goals}
+                      budgets={budgets}
+                      userId={user?.id}
+                      onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")}
+                    />
+                    <GoalIntelligencePanel transactions={transactions} goals={goals} currency={currency} />
+                    <InsightFeed transactions={transactions} goals={goals} budgets={budgets} monthlyIncome={Number(profile?.monthly_income || 0)} />
+                  </div>
                 )}
                 {tab === "automation" && (
                   <AutomationCenter
