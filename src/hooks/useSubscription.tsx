@@ -17,6 +17,8 @@ export interface SubscriptionRecord {
   current_period_end: string | null;
   cancel_at_period_end: boolean;
   price_id: string | null;
+  pending_plan_change: string | null;
+  pending_plan_change_at: string | null;
 }
 
 function tierForPriceKey(key?: string | null): PlanTier {

@@ -160,13 +160,23 @@ export default function Pricing() {
             const isCurrent = tier === plan.id;
             const planKey = cycle === "yearly" ? plan.planKeyYearly : plan.planKeyMonthly;
             const isLoading = loadingPlan === planKey;
+            const order = ["free", "pro", "elite"] as const;
+            const recommended = order.indexOf(plan.id) === order.indexOf(tier) + 1;
             return (
               <motion.div key={plan.id}
                 initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                 transition={{ delay: i * 0.1, type: "spring", stiffness: 100 }}
                 whileHover={{ y: -6 }}
-                className={`relative rounded-3xl bg-gradient-to-br ${plan.gradient} ${plan.ring} p-8 shadow-xl shadow-slate-900/5 ${plan.highlight ? "md:scale-[1.03] md:-translate-y-2" : ""} transition-shadow hover:shadow-2xl hover:shadow-indigo-500/10`}>
-                {plan.highlight && (
+                className={`relative rounded-3xl bg-gradient-to-br ${plan.gradient} ${isCurrent ? "ring-2 ring-emerald-400/70" : recommended ? "ring-2 ring-amber-400/70" : plan.ring} p-8 shadow-xl shadow-slate-900/5 ${plan.highlight ? "md:scale-[1.03] md:-translate-y-2" : ""} transition-shadow hover:shadow-2xl hover:shadow-indigo-500/10`}>
+                {isCurrent ? (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-semibold shadow-lg shadow-emerald-500/40">
+                    Your Current Plan
+                  </div>
+                ) : recommended ? (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-lg shadow-amber-500/40">
+                    Recommended Upgrade
+                  </div>
+                ) : plan.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-semibold shadow-lg shadow-indigo-500/40">
                     {plan.badge}
                   </div>
