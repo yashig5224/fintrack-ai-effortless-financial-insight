@@ -23,6 +23,8 @@ import NotificationCenter from "@/components/notifications/NotificationCenter";
 import GoalIntelligencePanel from "@/components/dashboard/GoalIntelligencePanel";
 import InsightFeed from "@/components/dashboard/InsightFeed";
 import SubscriptionIntelligencePanel from "@/components/dashboard/SubscriptionIntelligencePanel";
+import SubscriptionPanel from "@/components/subscription/SubscriptionPanel";
+import SubscriptionCard from "@/components/subscription/SubscriptionCard";
 
 type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
@@ -328,7 +330,10 @@ const UserApp = () => {
                   />
                 )}
                 {tab === "settings" && (
-                  <SettingsPanel profile={profile} onSaved={refreshProfile} onSignOut={handleSignOut} />
+                  <div className="space-y-8">
+                    <SubscriptionPanel profile={profile} onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")} />
+                    <SettingsPanel profile={profile} onSaved={refreshProfile} onSignOut={handleSignOut} />
+                  </div>
                 )}
               </motion.div>
             </AnimatePresence>
