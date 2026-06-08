@@ -22,6 +22,7 @@ import CommandCenter from "@/components/dashboard/CommandCenter";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import GoalIntelligencePanel from "@/components/dashboard/GoalIntelligencePanel";
 import InsightFeed from "@/components/dashboard/InsightFeed";
+import SubscriptionIntelligencePanel from "@/components/dashboard/SubscriptionIntelligencePanel";
 
 type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
@@ -227,6 +228,7 @@ const UserApp = () => {
                 {tab === "overview" && (
                   <div className="space-y-6">
                     <Overview stats={stats} insights={insights} trendData={trendData} categoryData={categoryData} currency={currency} persona={profile?.selected_persona} tier={tier} onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")} transactions={transactions} goals={goals} budgets={budgets} monthlyIncome={Number(profile?.monthly_income || 0)} />
+                    <SubscriptionIntelligencePanel transactions={transactions} currency={currency} />
                     <InsightFeed transactions={transactions} goals={goals} budgets={budgets} monthlyIncome={Number(profile?.monthly_income || 0)} />
                   </div>
                 )}
@@ -292,6 +294,7 @@ const UserApp = () => {
                       onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")}
                     />
                     <GoalIntelligencePanel transactions={transactions} goals={goals} currency={currency} />
+                    <SubscriptionIntelligencePanel transactions={transactions} currency={currency} />
                     <InsightFeed transactions={transactions} goals={goals} budgets={budgets} monthlyIncome={Number(profile?.monthly_income || 0)} />
                   </div>
                 )}
