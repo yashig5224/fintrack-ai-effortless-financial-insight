@@ -71,12 +71,17 @@ export function useSubscription() {
   }, [user, fetchSub]);
 
   const active = isActive(subscription);
-  const tier: PlanTier = active ? tierForPriceKey(subscription?.price_id) : "free";
+  const realTier: PlanTier = active ? tierForPriceKey(subscription?.price_id) : "free";
+
+  // In Demo Mode, the plan switcher (Basic/Pro/Elite) overrides the real tier
+  // so visitors can preview every feature gate without paying.
+  const demo = useDemoMode();
+  const tier: PlanTier = demo.isDemo ? demo.tier : realTier;
 
   return {
     subscription,
     tier,
-    isActive: active,
+    isActive: demo.isDemo ? tier !== "free" : active,
     isPro: tier === "pro" || tier === "elite",
     isElite: tier === "elite",
     loading,
