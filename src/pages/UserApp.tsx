@@ -250,7 +250,7 @@ const UserApp = () => {
                     transactions={transactions}
                     onAdd={() => setShowTxForm(true)}
                     onDelete={async (id) => {
-                      await supabase.from("transactions").delete().eq("id", id);
+                      if (!demo.isDemo) await supabase.from("transactions").delete().eq("id", id);
                       setTransactions(prev => prev.filter(t => t.id !== id));
                       toast.success("Deleted");
                     }}
