@@ -214,8 +214,16 @@ const UserApp = () => {
               <p className="text-sm text-gray-400">{greeting()},</p>
               <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900">{profile?.full_name || "Friend"} 👋</h1>
             </div>
-            <div className="flex items-center gap-2">
-              <NotificationCenter scanData={{ transactions, goals, budgets }} />
+            <div className="flex items-center gap-2 flex-wrap justify-end">
+              {demo.isDemo && (
+                <>
+                  <div className="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200 text-[10px] font-bold text-amber-800 uppercase tracking-wider">
+                    Demo Data
+                  </div>
+                  <DemoPlanSwitcher compact />
+                </>
+              )}
+              {!demo.isDemo && <NotificationCenter scanData={{ transactions, goals, budgets }} />}
               <div className="px-3 py-1.5 rounded-full bg-white border border-gray-100 text-xs font-semibold text-gray-700 shadow-sm">
                 Lvl {profile?.level ?? 1} • {profile?.xp ?? 0} XP
               </div>
