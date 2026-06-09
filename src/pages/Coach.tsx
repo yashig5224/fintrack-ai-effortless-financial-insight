@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import TransitionOverlay from "@/components/ai/TransitionOverlay";
 import PersonaSelection from "@/components/ai/PersonaSelection";
