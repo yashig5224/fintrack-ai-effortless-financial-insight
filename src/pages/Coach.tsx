@@ -35,11 +35,11 @@ const Coach = () => {
       setSelectedPersona(null);
       setPhase("persona");
     } else {
-      navigate("/dashboard");
+      navigate(homePath);
     }
   };
 
-  const handleExit = () => navigate("/dashboard");
+  const handleExit = () => navigate(homePath);
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-[#fafafa]">
