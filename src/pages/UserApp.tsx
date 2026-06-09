@@ -263,13 +263,13 @@ const UserApp = () => {
                       goals={goals}
                       onAdd={() => setShowGoalForm(true)}
                       onDelete={async (id) => {
-                        await supabase.from("goals").delete().eq("id", id);
+                        if (!demo.isDemo) await supabase.from("goals").delete().eq("id", id);
                         setGoals(prev => prev.filter(g => g.id !== id));
                       }}
                       onContribute={async (id, amount) => {
                         const g = goals.find(x => x.id === id); if (!g) return;
                         const newAmt = Math.min(Number(g.target_amount), Number(g.current_amount) + amount);
-                        await supabase.from("goals").update({ current_amount: newAmt }).eq("id", id);
+                        if (!demo.isDemo) await supabase.from("goals").update({ current_amount: newAmt }).eq("id", id);
                         setGoals(prev => prev.map(x => x.id === id ? { ...x, current_amount: newAmt } : x));
                         toast.success("Contribution added");
                       }}
