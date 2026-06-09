@@ -11,6 +11,8 @@ type Phase = "transition" | "persona" | "mission";
 
 const Coach = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const homePath = user ? "/app" : "/dashboard";
   const [phase, setPhase] = useState<Phase>("transition");
   const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null);
 
