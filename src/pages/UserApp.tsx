@@ -25,6 +25,9 @@ import InsightFeed from "@/components/dashboard/InsightFeed";
 import SubscriptionIntelligencePanel from "@/components/dashboard/SubscriptionIntelligencePanel";
 import SubscriptionPanel from "@/components/subscription/SubscriptionPanel";
 import SubscriptionCard from "@/components/subscription/SubscriptionCard";
+import { useDemoMode } from "@/contexts/DemoModeContext";
+import { DEMO_TRANSACTIONS, DEMO_GOALS, DEMO_BUDGETS, DEMO_PROFILE } from "@/lib/demoData";
+import DemoPlanSwitcher from "@/components/demo/DemoPlanSwitcher";
 
 type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
