@@ -348,7 +348,16 @@ const UserApp = () => {
                 )}
                 {tab === "settings" && (
                   <div className="space-y-8">
-                    <SubscriptionPanel profile={profile} onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")} />
+                    {demo.isDemo ? (
+                      <div className="glass-card bg-gradient-to-br from-indigo-50 via-white to-fuchsia-50 border border-indigo-100 rounded-3xl p-6">
+                        <p className="text-xs uppercase tracking-wider font-semibold text-indigo-500 mb-2">Demo Mode</p>
+                        <h3 className="font-display text-xl font-bold text-gray-900 mb-1">Preview every plan</h3>
+                        <p className="text-sm text-gray-600 mb-4">Switch between Basic, Pro, and Elite to see how each tier unlocks features across the app.</p>
+                        <DemoPlanSwitcher />
+                      </div>
+                    ) : (
+                      <SubscriptionPanel profile={profile} onUpgrade={() => openUpgrade(isPro ? "elite" : "pro")} />
+                    )}
                     <SettingsPanel profile={profile} onSaved={refreshProfile} onSignOut={handleSignOut} />
                   </div>
                 )}
