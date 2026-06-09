@@ -389,6 +389,13 @@ const UserApp = () => {
       <AnimatePresence>
         {showTxForm && (
           <TxForm onClose={() => setShowTxForm(false)} onSave={async (data) => {
+            if (demo.isDemo) {
+              const inserted: Tx = { id: `demo-tx-${Date.now()}`, ...data };
+              setTransactions(prev => [inserted, ...prev]);
+              setShowTxForm(false);
+              toast.success("Transaction added (demo)");
+              return;
+            }
             if (!user) return;
             const { data: inserted, error } = await supabase.from("transactions").insert({ ...data, user_id: user.id }).select().single();
             if (error) { toast.error(error.message); return; }
@@ -399,6 +406,13 @@ const UserApp = () => {
         )}
         {showGoalForm && (
           <GoalForm onClose={() => setShowGoalForm(false)} onSave={async (data) => {
+            if (demo.isDemo) {
+              const inserted: Goal = { id: `demo-goal-${Date.now()}`, ...data, current_amount: 0 };
+              setGoals(prev => [inserted, ...prev]);
+              setShowGoalForm(false);
+              toast.success("Goal created (demo)");
+              return;
+            }
             if (!user) return;
             const { data: inserted, error } = await supabase.from("goals").insert({ ...data, user_id: user.id }).select().single();
             if (error) { toast.error(error.message); return; }
