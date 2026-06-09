@@ -70,32 +70,40 @@ const fmt = (n: number, c = "INR") => new Intl.NumberFormat("en-IN", { style: "c
 
 const UserApp = () => {
   const navigate = useNavigate();
-  const { user, profile, signOut, refreshProfile } = useAuth();
+  const auth = useAuth();
+  const demo = useDemoMode();
+  const user = demo.isDemo ? ({ id: "demo-user", email: "demo@fintrack.ai" } as any) : auth.user;
+  const profile = demo.isDemo ? (DEMO_PROFILE as any) : auth.profile;
+  const signOut = demo.isDemo ? async () => { navigate("/"); } : auth.signOut;
+  const refreshProfile = demo.isDemo ? async () => {} : auth.refreshProfile;
   const [tab, setTab] = useState<Tab>("overview");
-  const [transactions, setTransactions] = useState<Tx[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [transactions, setTransactions] = useState<Tx[]>(demo.isDemo ? (DEMO_TRANSACTIONS as unknown as Tx[]) : []);
+  const [goals, setGoals] = useState<Goal[]>(demo.isDemo ? (DEMO_GOALS as unknown as Goal[]) : []);
+  const [budgets, setBudgets] = useState<Budget[]>(demo.isDemo ? (DEMO_BUDGETS as unknown as Budget[]) : []);
   const [showTxForm, setShowTxForm] = useState(false);
   const [showGoalForm, setShowGoalForm] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [upgradeTier, setUpgradeTier] = useState<"pro" | "elite">("pro");
   const { tier, isPro, isElite } = useSubscription();
-  const openUpgrade = (t: "pro" | "elite" = "pro") => { setUpgradeTier(t); setUpgradeOpen(true); };
+  const openUpgrade = (t: "pro" | "elite" = "pro") => {
+    if (demo.isDemo) { toast.info("Demo Mode — use the plan switcher to preview tiers."); return; }
+    setUpgradeTier(t); setUpgradeOpen(true);
+  };
 
   const currency = profile?.currency || "INR";
 
   useEffect(() => {
-    if (!user) return;
+    if (demo.isDemo || !auth.user) return;
     Promise.all([
-      supabase.from("transactions").select("*").eq("user_id", user.id).order("transaction_date", { ascending: false }),
-      supabase.from("goals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("budgets").select("*").eq("user_id", user.id).order("month", { ascending: false }),
+      supabase.from("transactions").select("*").eq("user_id", auth.user.id).order("transaction_date", { ascending: false }),
+      supabase.from("goals").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false }),
+      supabase.from("budgets").select("*").eq("user_id", auth.user.id).order("month", { ascending: false }),
     ]).then(([tx, gl, bg]) => {
       if (tx.data) setTransactions(tx.data as Tx[]);
       if (gl.data) setGoals(gl.data as Goal[]);
       if (bg.data) setBudgets(bg.data as Budget[]);
     });
-  }, [user]);
+  }, [auth.user, demo.isDemo]);
 
   const stats = useMemo(() => {
     const income = transactions.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
