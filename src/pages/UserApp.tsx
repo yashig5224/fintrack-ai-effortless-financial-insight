@@ -283,7 +283,7 @@ const UserApp = () => {
                         onContribute={async (id, amount) => {
                           const g = goals.find(x => x.id === id); if (!g) return;
                           const newAmt = Math.min(Number(g.target_amount), Number(g.current_amount) + amount);
-                          await supabase.from("goals").update({ current_amount: newAmt }).eq("id", id);
+                          if (!demo.isDemo) await supabase.from("goals").update({ current_amount: newAmt }).eq("id", id);
                           setGoals(prev => prev.map(x => x.id === id ? { ...x, current_amount: newAmt } : x));
                           toast.success("Contribution added");
                         }}
