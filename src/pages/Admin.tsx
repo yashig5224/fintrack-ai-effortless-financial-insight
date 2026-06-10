@@ -258,7 +258,7 @@ const Admin = () => {
   // Admin actions ───────────────────────────────────────────────────────────
   const audit = async (action: string, targetUserId: string, details: Record<string, unknown> = {}) => {
     if (!user) return;
-    await supabase.from("admin_audit_log").insert({ admin_id: user.id, target_user_id: targetUserId, action, details });
+    await supabase.from("admin_audit_log").insert({ admin_id: user.id, target_user_id: targetUserId, action, details: details as never });
   };
 
   const setPlan = async (p: Profile, plan: string) => {
