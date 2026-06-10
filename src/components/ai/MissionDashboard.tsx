@@ -507,6 +507,7 @@ const MissionDashboard = ({ persona, onBack }: MissionDashboardProps) => {
           model: selectedModel,
           persona: { id: persona.id, name: persona.name },
           history: history.slice(-8).map((m) => ({ role: m.role, text: m.text })),
+          ...(demoContext ? { context: demoContext, demo: true } : {}),
         },
       });
 
