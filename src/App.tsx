@@ -54,6 +54,9 @@ const App = () => (
               <ProtectedRoute requireOnboarding={false}><Billing /></ProtectedRoute>
             } />
 
+            {/* Hidden admin route — gated by user_roles inside the page */}
+            <Route path="/admin" element={<Admin />} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
