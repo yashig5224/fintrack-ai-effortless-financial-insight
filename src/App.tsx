@@ -14,6 +14,7 @@ import OnboardingFlow from "./components/auth/OnboardingFlow";
 import Pricing from "./pages/Pricing";
 import Billing from "./pages/Billing";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
 import { DemoModeProvider } from "@/contexts/DemoModeContext";
 import { useAuth } from "@/contexts/AuthContext";
 
