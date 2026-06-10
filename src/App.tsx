@@ -14,6 +14,7 @@ import OnboardingFlow from "./components/auth/OnboardingFlow";
 import Pricing from "./pages/Pricing";
 import Billing from "./pages/Billing";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
 import { DemoModeProvider } from "@/contexts/DemoModeContext";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -52,6 +53,9 @@ const App = () => (
             <Route path="/billing" element={
               <ProtectedRoute requireOnboarding={false}><Billing /></ProtectedRoute>
             } />
+
+            {/* Hidden admin route — gated by user_roles inside the page */}
+            <Route path="/admin" element={<Admin />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
