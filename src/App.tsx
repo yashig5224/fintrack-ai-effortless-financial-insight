@@ -15,6 +15,15 @@ import Pricing from "./pages/Pricing";
 import Billing from "./pages/Billing";
 import NotFound from "./pages/NotFound";
 import { DemoModeProvider } from "@/contexts/DemoModeContext";
+import { useAuth } from "@/contexts/AuthContext";
+
+// Anonymous visitors get full demo context inside Coach so tier-gated
+// features unlock and ai-router receives demo financial snapshot.
+const CoachRoute = () => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user ? <Coach /> : <DemoModeProvider><Coach /></DemoModeProvider>;
+};
 
 const queryClient = new QueryClient();
 
@@ -30,7 +39,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/coach" element={<Coach />} />
+            <Route path="/coach" element={<CoachRoute />} />
             <Route path="/dashboard" element={<DemoModeProvider><UserApp /></DemoModeProvider>} />
 
             {/* Protected */}
