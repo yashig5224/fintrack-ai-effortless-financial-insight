@@ -648,6 +648,60 @@ export type Database = {
         }
         Relationships: []
       }
+      statement_imports: {
+        Row: {
+          bank_hint: string | null
+          created_at: string
+          duplicate_count: number
+          error_message: string | null
+          file_name: string
+          file_path: string | null
+          file_size: number | null
+          id: string
+          skipped_count: number
+          source_type: string
+          status: string
+          summary: Json | null
+          transaction_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bank_hint?: string | null
+          created_at?: string
+          duplicate_count?: number
+          error_message?: string | null
+          file_name: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          skipped_count?: number
+          source_type?: string
+          status?: string
+          summary?: Json | null
+          transaction_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bank_hint?: string | null
+          created_at?: string
+          duplicate_count?: number
+          error_message?: string | null
+          file_name?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          skipped_count?: number
+          source_type?: string
+          status?: string
+          summary?: Json | null
+          transaction_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           amount: number | null
@@ -734,6 +788,7 @@ export type Database = {
           payment_method: string | null
           recurring: boolean | null
           source: string | null
+          statement_import_id: string | null
           title: string
           transaction_date: string
           type: string
@@ -750,6 +805,7 @@ export type Database = {
           payment_method?: string | null
           recurring?: boolean | null
           source?: string | null
+          statement_import_id?: string | null
           title: string
           transaction_date?: string
           type?: string
@@ -766,6 +822,7 @@ export type Database = {
           payment_method?: string | null
           recurring?: boolean | null
           source?: string | null
+          statement_import_id?: string | null
           title?: string
           transaction_date?: string
           type?: string
@@ -778,6 +835,13 @@ export type Database = {
             columns: ["bank_connection_id"]
             isOneToOne: false
             referencedRelation: "bank_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_statement_import_id_fkey"
+            columns: ["statement_import_id"]
+            isOneToOne: false
+            referencedRelation: "statement_imports"
             referencedColumns: ["id"]
           },
         ]
