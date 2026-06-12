@@ -440,6 +440,21 @@ const UserApp = () => {
       </AnimatePresence>
 
       <UpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} tier={upgradeTier} />
+
+      {user && (
+        <StatementImport
+          open={showImport}
+          onClose={() => setShowImport(false)}
+          userId={user.id}
+          currency={currency}
+          existing={transactions.map(t => ({ transaction_date: t.transaction_date, amount: Number(t.amount), title: t.title }))}
+          onImported={async () => {
+            if (demo.isDemo || !auth.user) return;
+            const { data } = await supabase.from("transactions").select("*").eq("user_id", auth.user.id).order("transaction_date", { ascending: false });
+            if (data) setTransactions(data as Tx[]);
+          }}
+        />
+      )}
     </div>
   );
 };
