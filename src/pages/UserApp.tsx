@@ -29,6 +29,7 @@ import SubscriptionCard from "@/components/subscription/SubscriptionCard";
 import { useDemoMode } from "@/contexts/DemoModeContext";
 import { DEMO_TRANSACTIONS, DEMO_GOALS, DEMO_BUDGETS, DEMO_PROFILE } from "@/lib/demoData";
 import DemoPlanSwitcher from "@/components/demo/DemoPlanSwitcher";
+import StatementImport from "@/components/transactions/StatementImport";
 
 type Tab = "overview" | "transactions" | "goals" | "reports" | "automation" | "settings";
 
@@ -83,6 +84,7 @@ const UserApp = () => {
   const [budgets, setBudgets] = useState<Budget[]>(demo.isDemo ? (DEMO_BUDGETS as unknown as Budget[]) : []);
   const [showTxForm, setShowTxForm] = useState(false);
   const [showGoalForm, setShowGoalForm] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [upgradeTier, setUpgradeTier] = useState<"pro" | "elite">("pro");
   const { tier, isPro, isElite } = useSubscription();
@@ -258,6 +260,10 @@ const UserApp = () => {
                   <Transactions
                     transactions={transactions}
                     onAdd={() => setShowTxForm(true)}
+                    onImport={() => {
+                      if (demo.isDemo) { toast.info("Statement import is available in User Mode."); return; }
+                      setShowImport(true);
+                    }}
                     onDelete={async (id) => {
                       if (!demo.isDemo) await supabase.from("transactions").delete().eq("id", id);
                       setTransactions(prev => prev.filter(t => t.id !== id));
@@ -485,13 +491,18 @@ const Overview = ({ stats, currency, persona, tier, onUpgrade, transactions, goa
   </div>
 );
 
-const Transactions = ({ transactions, onAdd, onDelete, currency }: any) => (
+const Transactions = ({ transactions, onAdd, onImport, onDelete, currency }: any) => (
   <div className="space-y-4">
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-2">
       <h2 className="font-display text-xl font-bold text-gray-900">All Transactions</h2>
-      <button onClick={onAdd} className="bg-gray-900 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-semibold hover:bg-gray-800 shadow-md">
-        <Plus className="w-4 h-4" /> Add
-      </button>
+      <div className="flex items-center gap-2">
+        <button onClick={onImport} className="bg-white border border-gray-200 text-gray-900 px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-semibold hover:bg-gray-50 shadow-sm">
+          <Sparkles className="w-4 h-4 text-violet-500" /> Import Statement
+        </button>
+        <button onClick={onAdd} className="bg-gray-900 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-semibold hover:bg-gray-800 shadow-md">
+          <Plus className="w-4 h-4" /> Add
+        </button>
+      </div>
     </div>
     {transactions.length === 0 ? (
       <div className="glass-card bg-white border border-gray-100 rounded-3xl p-12 text-center">
