@@ -383,23 +383,63 @@ const UserApp = () => {
         </div>
       </main>
 
-      {/* Mobile bottom nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-gray-100 px-2 py-2 flex items-center justify-around">
+      {/* Floating Action Button — mobile only (Add Transaction) */}
+      <button
+        onClick={() => setShowTxForm(true)}
+        aria-label="Add transaction"
+        className="lg:hidden fixed right-5 bottom-[88px] z-50 w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 text-white shadow-[0_12px_30px_-8px_rgba(99,102,241,0.6)] flex items-center justify-center active:scale-95 transition-transform safe-area-bottom"
+      >
+        <Plus className="w-6 h-6" strokeWidth={2.5} />
+      </button>
+
+      {/* Mobile bottom nav — 5 tabs with Coach center */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-gray-100 px-2 pt-1.5 pb-1.5 safe-area-bottom flex items-center justify-around">
         {([
-          { id: "overview", img: NAV_ICONS.overview },
-          { id: "transactions", img: NAV_ICONS.transactions },
-          { id: "goals", img: NAV_ICONS.goals },
-          { id: "reports", img: NAV_ICONS.reports },
-        ] as const).map(({ id, img }) => (
-          <button key={id} onClick={() => setTab(id as Tab)} className={`flex-1 flex flex-col items-center gap-0.5 py-1 rounded-xl transition-all ${tab === id ? "bg-gradient-to-b from-purple-50 to-cyan-50" : ""}`}>
-            <img src={img} alt="" className={`w-9 h-9 object-contain ${tab === id ? "" : "opacity-60"}`} />
-            <span className={`text-[10px] capitalize font-semibold ${tab === id ? "text-gray-900" : "text-gray-400"}`}>{id}</span>
-          </button>
-        ))}
-        <button onClick={() => setTab("settings")} className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl ${tab === "settings" ? "text-gray-900" : "text-gray-400"}`}>
-          <Settings className="w-5 h-5" />
-          <span className="text-[10px] font-semibold">Settings</span>
-        </button>
+          { id: "overview", label: "Home", icon: Home },
+          { id: "transactions", label: "Tx", icon: Receipt },
+          { id: "coach", label: "Coach", icon: Brain, link: "/coach" },
+          { id: "goals", label: "Goals", icon: Target },
+          { id: "reports", label: "Reports", icon: BarChart3 },
+        ] as const).map((item) => {
+          const Icon = item.icon;
+          const active = "link" in item ? false : tab === item.id;
+          const isCoach = item.id === "coach";
+          const inner = (
+            <>
+              <div
+                className={`flex items-center justify-center transition-all ${
+                  isCoach
+                    ? "w-10 h-10 -mt-3 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 text-white shadow-lg shadow-indigo-500/40"
+                    : active
+                    ? "text-gray-900"
+                    : "text-gray-400"
+                }`}
+              >
+                <Icon className={isCoach ? "w-5 h-5" : "w-5 h-5"} strokeWidth={active ? 2.4 : 1.8} />
+              </div>
+              <span
+                className={`text-[10px] font-semibold mt-0.5 ${
+                  active ? "text-gray-900" : isCoach ? "text-violet-600" : "text-gray-400"
+                }`}
+              >
+                {item.label}
+              </span>
+            </>
+          );
+          return "link" in item ? (
+            <Link key={item.id} to={item.link} className="flex-1 flex flex-col items-center py-1.5">
+              {inner}
+            </Link>
+          ) : (
+            <button
+              key={item.id}
+              onClick={() => setTab(item.id as Tab)}
+              className="flex-1 flex flex-col items-center py-1.5"
+            >
+              {inner}
+            </button>
+          );
+        })}
       </nav>
 
       <AnimatePresence>
