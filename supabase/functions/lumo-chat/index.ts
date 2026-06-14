@@ -140,6 +140,11 @@ RESPONSE FORMAT — strict:
     const data = await r.json();
     const text = data?.choices?.[0]?.message?.content ?? "I couldn't generate a response. Try again.";
 
+    // Persist for memory + server-side quota counting
+    await sb.from("ai_history").insert({
+      user_id: userId, persona: persona?.id ?? null, message, ai_response: text,
+    });
+
     return new Response(JSON.stringify({ text }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
