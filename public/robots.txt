@@ -12,3 +12,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /app
+Disallow: /onboarding
+Disallow: /billing
+
+Sitemap: https://finbee.lovable.app/sitemap.xml
