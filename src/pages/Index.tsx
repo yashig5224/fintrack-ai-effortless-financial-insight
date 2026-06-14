@@ -11,10 +11,37 @@ import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
 import AmbientLayer from "@/components/landing/AmbientLayer";
 import PricingPreview from "@/components/landing/PricingPreview";
+import SEO from "@/components/seo/SEO";
 
 const Index = () => {
   return (
     <div className="relative min-h-screen bg-white text-foreground overflow-x-hidden">
+      <SEO
+        title="FinTrack AI — AI budget planner & financial coach"
+        description="An AI budget planner and 24/7 financial coach. Automate tracking, set goals, and get personalized money advice across GPT, Gemini, and Claude."
+        path="/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "FinTrack AI",
+            url: "https://finbee.lovable.app",
+            logo: "https://finbee.lovable.app/icons/icon-512.png",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "FinTrack AI",
+            url: "https://finbee.lovable.app",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: "https://finbee.lovable.app/?q={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
+          },
+        ]}
+      />
+
       <AmbientLayer />
       <div className="relative z-10">
         <Navbar />
