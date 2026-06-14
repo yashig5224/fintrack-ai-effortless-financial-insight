@@ -6,6 +6,7 @@ import TransitionOverlay from "@/components/ai/TransitionOverlay";
 import PersonaSelection from "@/components/ai/PersonaSelection";
 import MissionDashboard from "@/components/ai/MissionDashboard";
 import type { Persona } from "@/components/ai/PersonaSelection";
+import SEO from "@/components/seo/SEO";
 
 type Phase = "transition" | "persona" | "mission";
 
@@ -43,6 +44,11 @@ const Coach = () => {
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-[#fafafa]">
+      <SEO
+        title="AI Financial Coach — FinTrack AI"
+        description="Chat with your personal AI financial coach. Pick a persona, get instant budget, savings and investment guidance powered by GPT, Gemini and Claude."
+        path="/coach"
+      />
       {/* Background is provided sharply inside PersonaSelection / MissionDashboard */}
 
       {/* Transition overlay */}

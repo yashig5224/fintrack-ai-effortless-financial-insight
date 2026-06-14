@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import SEO from "@/components/seo/SEO";
 
 /* ────────────────────────────────────────────────────────────── */
 /*  Subtle enterprise backdrop — soft mesh + dotted grid          */
@@ -267,6 +268,11 @@ const Login = () => {
 
   return (
     <div className="min-h-screen relative bg-[#fafafa] flex">
+      <SEO
+        title="Sign in to FinTrack AI — your AI budget planner"
+        description="Sign in or create your FinTrack AI account to access your AI budget planner, financial coach, and personalized money insights."
+        path="/login"
+      />
       <Backdrop />
       <FloatingGlyphs />
 
