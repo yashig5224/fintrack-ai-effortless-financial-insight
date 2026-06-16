@@ -307,13 +307,6 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: "AI not configured" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const authHeader = req.headers.get("Authorization") ?? "";
     if (!authHeader.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -335,8 +328,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { message, persona = {}, history = [], context, model: requestedModel = "auto" } =
-      await req.json();
+    const body = await req.json().catch(() => ({} as any));
+
+    // Admin health ping — returns which providers have keys configured.
+    if (body?.ping) {
+      const status = {
+        openai:     !!Deno.env.get("OPENAI_API_KEY"),
+        gemini:     !!Deno.env.get("GEMINI_API_KEY"),
+        groq:       !!Deno.env.get("GROQ_API_KEY"),
+        openrouter: !!Deno.env.get("OPENROUTER_API_KEY"),
+      };
+      const anyConfigured = Object.values(status).some(Boolean);
+      return new Response(JSON.stringify({ ok: anyConfigured, providers: status }), {
+        status: anyConfigured ? 200 : 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { message, persona = {}, history = [], context, model: requestedModel = "auto" } = body;
     if (!message || typeof message !== "string") {
       return new Response(JSON.stringify({ error: "message required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -357,7 +366,6 @@ Deno.serve(async (req) => {
         snapshotText = "USER FINANCIAL SNAPSHOT: (unavailable — proceed with general guidance).";
       }
     } else if (context && typeof context === "object") {
-      // Demo mode — use whatever the client passed.
       const lines = ["USER FINANCIAL SNAPSHOT (demo mode):"];
       if (context.monthlyIncome) lines.push(`- Monthly income: ₹${context.monthlyIncome}`);
       if (context.totalSpent)    lines.push(`- Spent this month: ₹${context.totalSpent}`);
@@ -375,12 +383,7 @@ Deno.serve(async (req) => {
       primary = allowed.includes(req) ? req : smartRoute(message, tier);
     } else primary = smartRoute(message, tier);
 
-    const fallbackOrder: Provider[] = [
-      primary,
-      ...(["gemini", "lumo", "gpt", "claude"] as Provider[]).filter(
-        (p) => p !== primary && allowed.includes(p),
-      ),
-    ];
+    const chain = failoverChain(primary, tier);
 
     const baseMessages: ChatMsg[] = [
       ...history.slice(-8).map((h: any) => ({
@@ -392,35 +395,32 @@ Deno.serve(async (req) => {
 
     const started = Date.now();
     let lastErr: any = null;
-    for (let i = 0; i < fallbackOrder.length; i++) {
-      const provider = fallbackOrder[i];
+    for (let i = 0; i < chain.length; i++) {
+      const provider = chain[i];
       const messages: ChatMsg[] = [
         { role: "system", content: buildSystem(provider, persona, snapshotText) },
         ...baseMessages,
       ];
       try {
-        const { text, usage } = await callGateway(provider, messages, apiKey);
+        const { text, usage } = await callProvider(provider, messages);
         const latency = Date.now() - started;
 
-        if (userId) {
-          // Log usage + persist conversation memory (best-effort, parallel).
-          await Promise.all([
-            sb.from("ai_usage_logs").insert({
-              user_id: userId, provider, model: PROVIDERS[provider].model,
-              requested_model: requestedModel,
-              prompt_tokens: usage?.prompt_tokens ?? null,
-              completion_tokens: usage?.completion_tokens ?? null,
-              total_tokens: usage?.total_tokens ?? null,
-              latency_ms: latency, status: "ok", fallback_used: i > 0,
-            }),
-            sb.from("ai_history").insert({
-              user_id: userId,
-              persona: persona?.id ?? null,
-              message,
-              ai_response: text,
-            }),
-          ]);
-        }
+        await Promise.all([
+          sb.from("ai_usage_logs").insert({
+            user_id: userId, provider, model: PROVIDERS[provider].model,
+            requested_model: requestedModel,
+            prompt_tokens: usage?.prompt_tokens ?? null,
+            completion_tokens: usage?.completion_tokens ?? null,
+            total_tokens: usage?.total_tokens ?? null,
+            latency_ms: latency, status: "ok", fallback_used: i > 0,
+          }),
+          sb.from("ai_history").insert({
+            user_id: userId,
+            persona: persona?.id ?? null,
+            message,
+            ai_response: text,
+          }),
+        ]);
 
         return new Response(JSON.stringify({
           text, provider, providerLabel: PROVIDERS[provider].label,
@@ -428,31 +428,32 @@ Deno.serve(async (req) => {
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       } catch (e: any) {
         lastErr = e;
-        console.error(`provider ${provider} failed`, e?.status, e?.detail);
-        if (e?.status === 429 || e?.status === 402) {
-          if (userId) {
-            await sb.from("ai_usage_logs").insert({
-              user_id: userId, provider, model: PROVIDERS[provider].model,
-              requested_model: requestedModel, status: "error",
-              latency_ms: Date.now() - started, error: `gateway_${e.status}`,
-            });
-          }
+        const status = e instanceof ProviderError ? e.status : 500;
+        const detail = e instanceof ProviderError ? e.detail : String(e?.message ?? e);
+        console.error(`provider ${provider} failed`, status, detail);
+        await sb.from("ai_usage_logs").insert({
+          user_id: userId, provider, model: PROVIDERS[provider].model,
+          requested_model: requestedModel, status: "error",
+          latency_ms: Date.now() - started, error: `${status}:${detail.slice(0, 200)}`,
+          fallback_used: i > 0,
+        });
+        // Hard fail on rate-limit / payment — don't cascade to other paid providers
+        if (status === 429 || status === 402) {
           return new Response(JSON.stringify({
-            error: e.status === 429 ? "Rate limit — slow down a sec." : "AI credits exhausted.",
-          }), { status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+            error: status === 429
+              ? "Rate limit on AI provider — slow down a sec."
+              : "AI provider credits exhausted. Top up your provider account.",
+          }), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
+        // Otherwise continue to next provider in chain
       }
     }
 
-    if (userId) {
-      await sb.from("ai_usage_logs").insert({
-        user_id: userId, provider: primary, model: PROVIDERS[primary].model,
-        requested_model: requestedModel, status: "error",
-        latency_ms: Date.now() - started, error: String(lastErr?.message ?? "all_failed"),
-      });
-    }
-    return new Response(JSON.stringify({ error: "AI temporarily unavailable" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({
+      error: "AI temporarily unavailable — all providers failed",
+      detail: lastErr instanceof ProviderError ? lastErr.detail : String(lastErr?.message ?? "unknown"),
+    }), {
+      status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("ai-router fatal", e);
