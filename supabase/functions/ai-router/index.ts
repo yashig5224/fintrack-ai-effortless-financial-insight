@@ -1,35 +1,19 @@
 // Multi-AI routing engine — secure server-side AI orchestration.
-// Routes to GPT / Gemini / Claude-class models via Lovable AI Gateway,
-// enforces plan-based access, smart-routes by intent, falls back on failure,
-// builds a real Financial Context snapshot from Supabase (Phase 2 AI Coach),
+// Routes to OpenAI / Gemini / Groq / OpenRouter using YOUR own API keys.
+// Enforces plan-based access, smart-routes by intent, falls back on failure,
+// builds a real Financial Context snapshot from Supabase,
 // persists conversations to ai_history, and logs every request to ai_usage_logs.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import {
+  PROVIDERS, allowedProviders, smartRoute, failoverChain, callProvider,
+  ProviderError, type Provider, type PlanTier, type ChatMsg,
+} from "../_shared/ai-providers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-type Provider = "lumo" | "gpt" | "gemini" | "claude";
-type PlanTier = "free" | "pro" | "elite";
-
-interface ProviderSpec {
-  id: Provider;
-  label: string;
-  model: string;
-  minTier: PlanTier;
-  strength: "balanced" | "reasoning" | "speed" | "analysis";
-}
-
-const PROVIDERS: Record<Provider, ProviderSpec> = {
-  lumo:   { id: "lumo",   label: "Lumo Core",     model: "google/gemini-3-flash-preview", minTier: "free",  strength: "balanced"  },
-  gpt:    { id: "gpt",    label: "GPT-class",     model: "openai/gpt-5-mini",             minTier: "pro",   strength: "reasoning" },
-  gemini: { id: "gemini", label: "Gemini Pro",    model: "google/gemini-2.5-pro",         minTier: "pro",   strength: "speed"     },
-  claude: { id: "claude", label: "Claude Sonnet", model: "openai/gpt-5",                  minTier: "elite", strength: "analysis"  },
-};
-
-const tierRank: Record<PlanTier, number> = { free: 0, pro: 1, elite: 2 };
 
 async function resolveTier(sb: ReturnType<typeof createClient>, userId: string): Promise<PlanTier> {
   const { data } = await sb
@@ -47,25 +31,6 @@ async function resolveTier(sb: ReturnType<typeof createClient>, userId: string):
   if (k.startsWith("pro")) return "pro";
   return "free";
 }
-
-function smartRoute(message: string, tier: PlanTier): Provider {
-  const m = message.toLowerCase();
-  const wantsAnalysis = /(forecast|predict|analy[sz]e|deep|long.?term|simulat|wealth|portfolio|invest|risk|scenari)/.test(m);
-  const wantsReasoning = /(why|explain|compare|should i|plan|strategy|trade.?off|optim[iy]z)/.test(m);
-  const wantsSpeed = /(quick|fast|short|tldr|summar[iy]|brief|one.?liner)/.test(m);
-  if (wantsAnalysis && tier === "elite") return "claude";
-  if (wantsReasoning && tierRank[tier] >= 1) return "gpt";
-  if (wantsSpeed && tierRank[tier] >= 1) return "gemini";
-  return tier === "free" ? "lumo" : "gemini";
-}
-
-function allowedProviders(tier: PlanTier): Provider[] {
-  return (Object.values(PROVIDERS) as ProviderSpec[])
-    .filter((p) => tierRank[tier] >= tierRank[p.minTier])
-    .map((p) => p.id);
-}
-
-interface ChatMsg { role: "user" | "assistant" | "system"; content: string }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PHASE 2 — Financial Context Engine
