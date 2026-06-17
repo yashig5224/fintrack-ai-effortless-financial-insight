@@ -142,6 +142,17 @@ Deno.serve(async (req) => {
       premium_enabled: limits.premium_enabled,
     }).eq("id", userId);
 
+    // Fire-and-forget payment success email
+    if (userData.user.email) {
+      admin.functions.invoke("send-email", {
+        body: {
+          to: userData.user.email,
+          templateName: "payment-success",
+          data: { amount: amount / 100, plan: planName, paymentId: razorpay_payment_id },
+        },
+      }).catch((e) => console.error("send-email", e));
+    }
+
     return new Response(JSON.stringify({ success: true, tier, planName, renewalDate: renewal.toISOString() }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
