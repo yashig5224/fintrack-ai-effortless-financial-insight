@@ -203,6 +203,13 @@ const Login = () => {
           },
         });
         if (error) throw error;
+        import("@/lib/pushTriggers").then(({ sendEmail }) =>
+          sendEmail({
+            to: email,
+            templateName: "welcome",
+            data: { name: fullName, appUrl: `${window.location.origin}/app` },
+          }),
+        ).catch(() => {});
         toast.success(
           `Welcome${fullName ? ", " + fullName.split(" ")[0] : ""}! Check your email to confirm.`
         );
