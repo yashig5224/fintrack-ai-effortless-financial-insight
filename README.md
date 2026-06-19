@@ -2,46 +2,59 @@ FinTrac is an AI-powered personal finance management platform designed to help u
 
 The platform provides real-time financial insights, automated expense categorization, subscription management, spending analytics, and intelligent recommendations to improve financial health.
 
+---
+
 🚀 Features
+<br>
 💰 Expense Tracking
 Add, edit, and delete transactions
 Categorize expenses and income
 Real-time balance updates
 Multi-category support
+<br>
 📊 Financial Analytics
 Monthly spending reports
 Income vs Expense visualization
 Category-wise expense breakdown
 Trend analysis and forecasting
+<br>
 🤖 AI Insights
 Smart spending analysis
 Personalized financial recommendations
 Budget optimization suggestions
 Financial health scoring
+<br>
 📅 Budget Management
 Create custom budgets
 Monthly spending limits
 Budget progress tracking
 Overspending alerts
+<br>
 🔔 Smart Notifications
 Budget alerts
 Bill reminders
 Subscription renewal notifications
 Financial goal updates
+<br>
 💳 Subscription Tracking
 Monitor recurring payments
 Subscription cost analysis
 Renewal reminders
 Unused subscription detection
+<br>
 🔐 Secure Authentication
 Email & Password Authentication
 Secure user sessions
 Protected routes
 User-specific data access
+<br>
 ☁️ Cloud-Based Storage
 Real-time synchronization
 Secure database management
 Cross-device accessibility
+
+---
+
 🛠 Tech Stack
 Frontend
 React.js
@@ -59,7 +72,6 @@ Supabase Auth
 Deployment
 Vercel
 Netlify
-Lovable
 📂 Project Structure
 FinTrac/
 │
@@ -83,6 +95,9 @@ FinTrac/
 ├── vite.config.ts
 ├── tailwind.config.js
 └── README.md
+
+---
+
 ⚙️ Installation
 Clone Repository
 git clone https://github.com/yourusername/fintrac.git
@@ -98,6 +113,9 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 RAZORPAY_KEY_ID=your_razorpay_key
 RAZORPAY_KEY_SECRET=your_razorpay_secret
+
+---
+
 Run Development Server
 npm run dev
 🗄 Database Setup
@@ -130,6 +148,9 @@ const order = await fetch("/create-order", {
 Verify Payment
 const payment = new Razorpay(options);
 payment.open();
+
+---
+
 📈 Future Roadmap
 AI Financial Advisor
 Bank Account Integration
@@ -139,6 +160,9 @@ Tax Planning Assistant
 Multi-Currency Support
 Voice-Based Expense Entry
 OCR Receipt Scanning
+
+----
+
 🤝 Contributing
 Fork the repository
 Create a feature branch
@@ -148,12 +172,18 @@ git commit -m "Added new feature"
 Push branch
 git push origin feature/new-feature
 Create Pull Request
+
+---
+
 🔒 Security
 Encrypted Authentication
 Secure API Endpoints
 Row Level Security (RLS)
 Protected User Data
 Secure Payment Processing
+
+---
+
 📄 License
 
 This project is licensed under the MIT License.
