@@ -1,0 +1,310 @@
+import { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mic, Send } from "lucide-react";
+import { lumoAvatar } from "@/assets/personas";
+
+type Msg = { id: number; role: "user" | "ai"; text: string; chart?: number[] };
+
+const SCRIPT: Msg[] = [
+  { id: 1, role: "user", text: "How can I reduce food spending?" },
+  { id: 2, role: "ai", text: "You spent 18% more on dining this week. Want me to set a ₹4,000 weekly meal budget?", chart: [30, 45, 28, 60, 75, 90, 70] },
+  { id: 3, role: "user", text: "Can I afford a Goa trip in March?" },
+  { id: 4, role: "ai", text: "Yes — at your current pace you'll have ₹38,400 free by March. A 3-day Goa trip fits comfortably." },
+];
+
+const FLOW_AMOUNTS = ["+₹2,400", "-₹350", "+₹85,000", "-₹1,299", "-₹649", "+₹520", "-₹240", "+₹1,800"];
+
+const HeroPhone = () => {
+  const [shown, setShown] = useState<Msg[]>([SCRIPT[0]]);
+  const [typing, setTyping] = useState(false);
+  const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    if (step >= SCRIPT.length) {
+      const reset = setTimeout(() => { setShown([SCRIPT[0]]); setStep(1); }, 7000);
+      return () => clearTimeout(reset);
+    }
+    const next = SCRIPT[step];
+    const delay = next.role === "ai" ? 900 : 1600;
+    const t1 = setTimeout(() => { if (next.role === "ai") setTyping(true); }, delay - 600);
+    const t2 = setTimeout(() => {
+      setTyping(false);
+      setShown((p) => [...p, next]);
+      setStep((s) => s + 1);
+    }, delay);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [step]);
+
+  return (
+    <div className="relative h-[520px] sm:h-[600px] lg:h-[660px] flex items-center justify-center">
+      {/* Halo */}
+      <div className="absolute inset-0 m-auto w-[440px] h-[440px] rounded-full bg-gradient-to-br from-[hsl(220,100%,90%,0.55)] via-[hsl(260,100%,92%,0.45)] to-[hsl(150,80%,90%,0.45)] blur-3xl" />
+
+      {/* Phone */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 24 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ delay: 0.25, duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="relative z-20"
+      >
+        <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
+          <div className="relative w-[290px] sm:w-[320px] h-[580px] sm:h-[620px] rounded-[3rem] bg-gradient-to-b from-[hsl(230,30%,92%)] to-[hsl(250,30%,88%)] p-[6px] shadow-[0_40px_100px_-30px_rgba(120,90,220,0.45),0_20px_50px_-20px_rgba(80,80,180,0.25)]">
+            <div className="absolute inset-[6px] rounded-[2.7rem] bg-black/5" />
+            <div className="relative w-full h-full rounded-[2.7rem] bg-gradient-to-b from-white to-[hsl(220,40%,98%)] overflow-hidden">
+              {/* Notch */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-[hsl(230,20%,15%)] rounded-b-2xl z-30" />
+
+              {/* Status bar */}
+              <div className="relative z-10 px-6 pt-3 pb-2 flex items-center justify-between text-[10px] font-semibold text-foreground/70">
+                <span>9:41</span>
+                <span className="flex items-center gap-1">
+                  <span className="w-3 h-1.5 rounded-sm bg-foreground/60" />
+                  <span className="w-3 h-1.5 rounded-sm bg-foreground/60" />
+                  <span className="w-4 h-2 rounded-sm border border-foreground/60" />
+                </span>
+              </div>
+
+              {/* Chat header */}
+              <div className="relative z-10 px-4 pt-3 pb-3 flex items-center gap-2.5 border-b border-foreground/5">
+                <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-[hsl(200,90%,85%)] to-[hsl(280,80%,88%)] p-[2px]">
+                  <img src={lumoAvatar} alt="" className="w-full h-full rounded-full object-cover" />
+                  <motion.span
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute -inset-1 rounded-full border border-[hsl(150,80%,55%)]"
+                  />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[hsl(150,80%,55%)] border-2 border-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[12px] font-bold tracking-tight">Lumo AI</div>
+                  <div className="text-[9px] text-foreground/55">Your finance coach · online</div>
+                </div>
+                <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[hsl(150,80%,92%)] to-[hsl(170,80%,90%)] text-[9px] font-semibold text-[hsl(150,70%,30%)]">
+                  AI
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div className="relative z-10 px-3 py-3 space-y-2 h-[400px] sm:h-[430px] overflow-hidden">
+                <AnimatePresence initial={false}>
+                  {shown.map((m) => (
+                    <motion.div
+                      key={m.id}
+                      initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.35, ease: "easeOut" }}
+                      className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-[82%] px-3 py-2 text-[11px] leading-snug ${
+                          m.role === "user"
+                            ? "rounded-2xl rounded-br-md bg-gradient-to-br from-[hsl(220,90%,58%)] to-[hsl(260,80%,62%)] text-white shadow-[0_6px_20px_-8px_rgba(120,90,220,0.5)]"
+                            : "rounded-2xl rounded-bl-md bg-[hsl(220,30%,97%)] text-foreground border border-white"
+                        }`}
+                      >
+                        <div>{m.text}</div>
+                        {m.chart && (
+                          <div className="mt-2 flex items-end gap-1 h-8">
+                            {m.chart.map((h, i) => (
+                              <motion.div
+                                key={i}
+                                initial={{ height: 0 }}
+                                animate={{ height: `${h}%` }}
+                                transition={{ delay: 0.2 + i * 0.05, duration: 0.5 }}
+                                className="flex-1 rounded-t bg-gradient-to-t from-[hsl(220,90%,70%)] to-[hsl(260,85%,75%)]"
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                  {typing && (
+                    <motion.div
+                      key="typing"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="flex justify-start"
+                    >
+                      <div className="px-3 py-2 rounded-2xl rounded-bl-md bg-[hsl(220,30%,97%)] border border-white flex items-center gap-1">
+                        {[0, 1, 2].map((i) => (
+                          <motion.span
+                            key={i}
+                            animate={{ y: [0, -3, 0], opacity: [0.4, 1, 0.4] }}
+                            transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15 }}
+                            className="w-1.5 h-1.5 rounded-full bg-foreground/40"
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Suggestion chips */}
+              <div className="relative z-10 px-3 pb-2 flex gap-1.5 overflow-hidden">
+                {["Where am I overspending?", "Plan a trip", "Save more"].map((t) => (
+                  <span key={t} className="shrink-0 px-2.5 py-1 rounded-full bg-white border border-foreground/10 text-[9px] text-foreground/65 shadow-sm">
+                    {t}
+                  </span>
+                ))}
+              </div>
+
+              {/* Input bar */}
+              <div className="absolute bottom-0 inset-x-0 px-3 pb-4 pt-2 bg-gradient-to-t from-white via-white to-transparent">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white border border-foreground/10 shadow-sm">
+                  <input
+                    readOnly
+                    placeholder="Ask Lumo anything…"
+                    className="flex-1 bg-transparent text-[11px] outline-none placeholder:text-foreground/40"
+                  />
+                  <Mic className="w-3.5 h-3.5 text-foreground/40" />
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[hsl(220,90%,58%)] to-[hsl(280,80%,62%)] flex items-center justify-center">
+                    <Send className="w-3 h-3 text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Elegant money-flow particles — holographic ₹, floating amounts, glowing coins */}
+      <MoneyFlow />
+
+      {/* Orbit ring */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+        className="absolute inset-0 m-auto w-[440px] h-[440px] rounded-full border border-dashed border-[hsl(260,40%,80%,0.35)] hidden lg:block pointer-events-none"
+      />
+    </div>
+  );
+};
+
+// ───── Money-flow particles ─────
+const MoneyFlow = () => {
+  // Stable random positions per render
+  const rupees = useMemo(
+    () =>
+      Array.from({ length: 9 }).map((_, i) => ({
+        id: i,
+        left: 5 + Math.random() * 90,
+        delay: Math.random() * 6,
+        duration: 14 + Math.random() * 10,
+        size: 14 + Math.random() * 18,
+        drift: (Math.random() - 0.5) * 60,
+      })),
+    []
+  );
+  const amounts = useMemo(
+    () =>
+      FLOW_AMOUNTS.map((v, i) => ({
+        id: i,
+        value: v,
+        positive: v.startsWith("+"),
+        left: 8 + ((i * 73) % 84),
+        delay: i * 1.4,
+        duration: 12 + (i % 4) * 2,
+      })),
+    []
+  );
+  const coins = useMemo(
+    () =>
+      Array.from({ length: 6 }).map((_, i) => ({
+        id: i,
+        left: 10 + Math.random() * 80,
+        top: 10 + Math.random() * 80,
+        delay: Math.random() * 4,
+        duration: 6 + Math.random() * 4,
+      })),
+    []
+  );
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden hidden sm:block">
+      {/* Rising ₹ symbols */}
+      {rupees.map((r) => (
+        <motion.div
+          key={`r-${r.id}`}
+          initial={{ opacity: 0, y: "110%", x: 0 }}
+          animate={{ opacity: [0, 0.35, 0.35, 0], y: "-20%", x: r.drift }}
+          transition={{ duration: r.duration, delay: r.delay, repeat: Infinity, ease: "linear" }}
+          className="absolute font-display font-bold select-none"
+          style={{
+            left: `${r.left}%`,
+            fontSize: `${r.size}px`,
+            color: "transparent",
+            WebkitTextStroke: "1px hsl(260,60%,70%,0.5)",
+            filter: "drop-shadow(0 0 12px hsl(220,90%,75%,0.35))",
+          }}
+        >
+          ₹
+        </motion.div>
+      ))}
+
+      {/* Floating transaction amounts */}
+      {amounts.map((a) => (
+        <motion.div
+          key={`a-${a.id}`}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: [0, 0.7, 0.7, 0], y: -90 }}
+          transition={{ duration: a.duration, delay: a.delay, repeat: Infinity, ease: "easeOut" }}
+          className="absolute text-[10px] font-semibold tracking-tight px-2 py-0.5 rounded-full backdrop-blur-sm border border-white/60"
+          style={{
+            left: `${a.left}%`,
+            bottom: "5%",
+            color: a.positive ? "hsl(150,70%,32%)" : "hsl(340,70%,42%)",
+            background: a.positive ? "hsl(150,80%,95%,0.7)" : "hsl(340,80%,96%,0.7)",
+          }}
+        >
+          {a.value}
+        </motion.div>
+      ))}
+
+      {/* Holographic coin orbs */}
+      {coins.map((c) => (
+        <motion.div
+          key={`c-${c.id}`}
+          animate={{
+            y: [0, -14, 0],
+            opacity: [0.25, 0.6, 0.25],
+            scale: [1, 1.15, 1],
+          }}
+          transition={{ duration: c.duration, delay: c.delay, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute w-3 h-3 rounded-full"
+          style={{
+            left: `${c.left}%`,
+            top: `${c.top}%`,
+            background:
+              "radial-gradient(circle at 30% 30%, hsl(45,100%,85%,0.9), hsl(35,90%,70%,0.5) 60%, transparent 80%)",
+            boxShadow: "0 0 16px hsl(45,100%,70%,0.5)",
+          }}
+        />
+      ))}
+
+      {/* Subtle data wave */}
+      <svg className="absolute inset-x-0 bottom-0 w-full h-32 opacity-30" viewBox="0 0 400 80" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="hero-wave" x1="0" x2="1">
+            <stop offset="0" stopColor="hsl(220,90%,70%)" stopOpacity="0" />
+            <stop offset="0.5" stopColor="hsl(260,80%,72%)" stopOpacity="0.6" />
+            <stop offset="1" stopColor="hsl(180,80%,70%)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <motion.path
+          d="M0,40 Q100,10 200,40 T400,40"
+          fill="none"
+          stroke="url(#hero-wave)"
+          strokeWidth="1.5"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: [0, 1, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </svg>
+    </div>
+  );
+};
+
+export default HeroPhone;
