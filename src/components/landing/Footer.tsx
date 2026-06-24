@@ -15,7 +15,7 @@ const Footer = () => {
                   <img src={lumoAvatar} alt="" className="w-full h-full rounded-full" />
                 </div>
                 <span className="font-display text-lg font-bold">
-                  FinTrack<span className="bg-clip-text text-transparent bg-gradient-to-r from-[hsl(220,90%,55%)] to-[hsl(280,80%,60%)]"> AI</span>
+                  TrackMint<span className="bg-clip-text text-transparent bg-gradient-to-r from-[hsl(220,90%,55%)] to-[hsl(280,80%,60%)]"> AI</span>
                 </span>
               </Link>
               <p className="text-sm text-foreground/65 max-w-xs leading-relaxed">
@@ -49,7 +49,7 @@ const Footer = () => {
           </div>
 
           <div className="mt-10 pt-6 border-t border-white/90 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-foreground/55">© 2026 FinTrack AI · Crafted with love + Lumo.</p>
+            <p className="text-xs text-foreground/55">© 2026 TrackMint · Crafted with love + Lumo.</p>
             <p className="text-xs text-foreground/55">Made for the next-gen money mind.</p>
           </div>
         </div>

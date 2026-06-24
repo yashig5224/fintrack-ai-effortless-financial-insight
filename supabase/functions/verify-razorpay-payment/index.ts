@@ -9,20 +9,20 @@ const corsHeaders = {
 };
 
 const TIER_LIMITS: Record<string, { ai_usage_limit: number; voice_enabled: boolean; premium_enabled: boolean }> = {
-  free:   { ai_usage_limit: 10,   voice_enabled: false, premium_enabled: false },
-  starter:{ ai_usage_limit: 100,  voice_enabled: false, premium_enabled: false },
-  pro:    { ai_usage_limit: 9999, voice_enabled: false, premium_enabled: true  },
-  elite:  { ai_usage_limit: 99999,voice_enabled: true,  premium_enabled: true  },
+  free: { ai_usage_limit: 10, voice_enabled: false, premium_enabled: false },
+  starter: { ai_usage_limit: 100, voice_enabled: false, premium_enabled: false },
+  pro: { ai_usage_limit: 9999, voice_enabled: false, premium_enabled: true },
+  elite: { ai_usage_limit: 99999, voice_enabled: true, premium_enabled: true },
 };
 
 // Server-side source of truth for plan amounts/tier — never trust the client.
 const PLAN_AMOUNTS: Record<string, { amount: number; name: string; cycle: "monthly" | "yearly"; tier: "pro" | "elite" | "starter" }> = {
   starter_monthly: { amount: 29900, name: "Starter", cycle: "monthly", tier: "starter" },
-  pro_monthly:     { amount: 29900, name: "Pro AI", cycle: "monthly", tier: "pro" },
-  pro_yearly:      { amount: 299900, name: "Pro AI", cycle: "yearly", tier: "pro" },
-  elite_monthly:   { amount: 79900, name: "Elite AI+", cycle: "monthly", tier: "elite" },
-  elite_yearly:    { amount: 799900, name: "Elite AI+", cycle: "yearly", tier: "elite" },
-  ultimate_monthly:{ amount: 149900, name: "Ultimate AI", cycle: "monthly", tier: "elite" },
+  pro_monthly: { amount: 29900, name: "Pro AI", cycle: "monthly", tier: "pro" },
+  pro_yearly: { amount: 299900, name: "Pro AI", cycle: "yearly", tier: "pro" },
+  elite_monthly: { amount: 79900, name: "Elite AI+", cycle: "monthly", tier: "elite" },
+  elite_yearly: { amount: 799900, name: "Elite AI+", cycle: "yearly", tier: "elite" },
+  ultimate_monthly: { amount: 149900, name: "Ultimate AI", cycle: "monthly", tier: "elite" },
 };
 
 async function hmacSha256Hex(secret: string, message: string): Promise<string> {
@@ -121,26 +121,96 @@ Deno.serve(async (req) => {
       price_id: planKey,
       environment: "sandbox",
     });
-    if (subErr) console.error("subscription insert", subErr);
+    if (subErr) {
+      console.error("subscription insert failed", subErr);
 
-    await admin.from("payments").insert({
-      user_id: userId,
-      amount: amount / 100,
-      currency: "inr",
-      payment_status: "succeeded",
-      razorpay_payment_id,
-      razorpay_order_id,
-      plan_name: planName,
-      environment: "sandbox",
-    });
+      return new Response(
+        JSON.stringify({
+          error: "Failed to create subscription",
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } const { data: existingPayment } = await admin
+      .from("payments")
+      .select("id")
+      .eq("razorpay_payment_id", razorpay_payment_id)
+      .maybeSingle();
+
+    if (existingPayment) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Payment already processed",
+        }),
+        {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+    const { error: paymentErr } =
+      await admin.from("payments").insert({
+        user_id: userId,
+        amount: amount / 100,
+        currency: "inr",
+        payment_status: "succeeded",
+        razorpay_payment_id,
+        razorpay_order_id,
+        plan_name: planName,
+        environment: "sandbox",
+      });
+
+    if (paymentErr) {
+      console.error(paymentErr);
+
+      return new Response(
+        JSON.stringify({
+          error: "Payment record creation failed",
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
 
     const limits = TIER_LIMITS[tier] ?? TIER_LIMITS.free;
-    await admin.from("profiles").update({
-      current_plan: tier,
-      ai_usage_limit: limits.ai_usage_limit,
-      voice_enabled: limits.voice_enabled,
-      premium_enabled: limits.premium_enabled,
-    }).eq("id", userId);
+    const { error: profileErr } =
+      await admin.from("profiles").update({
+        current_plan: tier,
+        ai_usage_limit: limits.ai_usage_limit,
+        voice_enabled: limits.voice_enabled,
+        premium_enabled: limits.premium_enabled,
+      }).eq("id", userId);
+
+    if (profileErr) {
+      console.error(profileErr);
+
+      return new Response(
+        JSON.stringify({
+          error: "Profile update failed",
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
 
     // Fire-and-forget payment success email
     if (userData.user.email) {

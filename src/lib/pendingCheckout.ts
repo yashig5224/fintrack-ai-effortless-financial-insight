@@ -7,7 +7,7 @@ export interface PendingCheckout {
   cycle: "monthly" | "yearly";
 }
 
-const KEY = "fintrack:pendingCheckout";
+const KEY = "TrackMint:pendingCheckout";
 
 export function setPendingCheckout(p: PendingCheckout) {
   try { localStorage.setItem(KEY, JSON.stringify(p)); } catch {}

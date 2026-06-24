@@ -1,6 +1,6 @@
 {
-  "name": "FinTrack AI — Your Financial Universe",
-  "short_name": "FinTrack",
+  "name": "TrackMint — Your Financial Universe",
+  "short_name": "TrackMint",
   "description": "AI-powered personal finance — coaching, automation, and gamified goals.",
   "start_url": "/app",
   "scope": "/",
@@ -11,13 +11,13 @@
   "categories": ["finance", "productivity", "lifestyle"],
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/icons/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

@@ -103,7 +103,7 @@ const Dashboard = () => {
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-gray-900 to-gray-700 flex items-center justify-center shadow-md">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
-              <span className="font-display text-lg font-bold tracking-tight">FinTrack</span>
+              <span className="font-display text-lg font-bold tracking-tight">TrackMint</span>
             </Link>
           )}
           {sidebarCollapsed && (

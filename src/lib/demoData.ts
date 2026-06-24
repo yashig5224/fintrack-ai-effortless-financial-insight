@@ -135,7 +135,7 @@ export const DEMO_AUTOMATION_LOGS: DemoAutomationLog[] = [
 export const DEMO_PROFILE = {
   id: "demo-user",
   full_name: "Alex Morgan",
-  email: "demo@fintrack.ai",
+  email: "demo@TrackMint.ai",
   currency: "INR",
   monthly_income: 185000,
   selected_persona: "salary" as const,

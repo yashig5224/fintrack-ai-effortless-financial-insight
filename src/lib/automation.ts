@@ -28,7 +28,7 @@ export const AUTOMATIONS: AutomationMeta[] = [
   { key: "monthly_report", title: "Monthly AI Summary", description: "Generates an investor-grade monthly report automatically.", tier: "elite", emoji: "📊" },
 ];
 
-const STORAGE_KEY = "fintrack_automation_v1";
+const STORAGE_KEY = "TrackMint_automation_v1";
 type State = Record<AutomationKey, boolean>;
 const DEFAULTS: State = {
   auto_budget: true, auto_categorize: true, spike_detection: true,

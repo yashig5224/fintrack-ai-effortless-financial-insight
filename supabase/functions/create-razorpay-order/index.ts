@@ -11,11 +11,11 @@ const corsHeaders = {
 
 const PLAN_AMOUNTS: Record<string, { amount: number; name: string; cycle: "monthly" | "yearly"; tier: "pro" | "elite" | "starter" }> = {
   starter_monthly: { amount: 29900, name: "Starter", cycle: "monthly", tier: "starter" },
-  pro_monthly:     { amount: 29900, name: "Pro AI", cycle: "monthly", tier: "pro" },
-  pro_yearly:      { amount: 299900, name: "Pro AI", cycle: "yearly", tier: "pro" },
-  elite_monthly:   { amount: 79900, name: "Elite AI+", cycle: "monthly", tier: "elite" },
-  elite_yearly:    { amount: 799900, name: "Elite AI+", cycle: "yearly", tier: "elite" },
-  ultimate_monthly:{ amount: 149900, name: "Ultimate AI", cycle: "monthly", tier: "elite" },
+  pro_monthly: { amount: 29900, name: "Pro AI", cycle: "monthly", tier: "pro" },
+  pro_yearly: { amount: 299900, name: "Pro AI", cycle: "yearly", tier: "pro" },
+  elite_monthly: { amount: 79900, name: "Elite AI+", cycle: "monthly", tier: "elite" },
+  elite_yearly: { amount: 799900, name: "Elite AI+", cycle: "yearly", tier: "elite" },
+  ultimate_monthly: { amount: 149900, name: "Ultimate AI", cycle: "monthly", tier: "elite" },
 };
 
 Deno.serve(async (req) => {
@@ -44,6 +44,26 @@ Deno.serve(async (req) => {
 
     const keyId = Deno.env.get("RAZORPAY_KEY_ID")!;
     const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET")!;
+    if (!keyId || !keySecret) {
+      console.error("Missing Razorpay credentials", {
+        hasKeyId: !!keyId,
+        hasKeySecret: !!keySecret,
+      });
+
+      return new Response(
+        JSON.stringify({
+          error: "Razorpay configuration missing",
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
     const auth = btoa(`${keyId}:${keySecret}`);
 
     const orderRes = await fetch("https://api.razorpay.com/v1/orders", {
@@ -72,7 +92,9 @@ Deno.serve(async (req) => {
       tier: plan.tier,
     }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
-    console.error("create-razorpay-order:", e);
-    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    console.error("create-razorpay-order failed", {
+      error: e,
+      stack: e instanceof Error ? e.stack : null,
+    }); return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

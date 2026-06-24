@@ -30,15 +30,7 @@ const HeroSection = () => {
       >
         {/* LEFT */}
         <div className="text-center lg:text-left">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 backdrop-blur-md border border-white/80 text-xs font-medium text-foreground/80 shadow-sm mb-6"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(150,80%,50%)] animate-pulse" />
-            Powered by Lumo AI · v2.0
-          </motion.div>
+
 
           <motion.h1
             initial={{ opacity: 0, y: 30 }}

@@ -26,9 +26,6 @@ Deno.serve(async (req) => {
     await admin.from("subscriptions")
       .update({ status: "canceled", cancel_at_period_end: true })
       .eq("user_id", userData.user.id).eq("status", "active");
-    await admin.from("profiles").update({
-      current_plan: "free", ai_usage_limit: 10, voice_enabled: false, premium_enabled: false,
-    }).eq("id", userData.user.id);
 
     if (userData.user.email && activeSub) {
       admin.functions.invoke("send-email", {
@@ -40,7 +37,11 @@ Deno.serve(async (req) => {
       }).catch((e) => console.error("send-email", e));
     }
 
-    return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        accessUntil: activeSub?.current_period_end
+      }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }

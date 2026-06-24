@@ -20,7 +20,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import SEO from "@/components/seo/SEO";
@@ -113,9 +112,8 @@ const Field = ({
   return (
     <div className="relative">
       <Icon
-        className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors ${
-          focus ? "text-slate-900" : "text-slate-400"
-        }`}
+        className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors ${focus ? "text-slate-900" : "text-slate-400"
+          }`}
         strokeWidth={1.8}
       />
       <input
@@ -130,11 +128,10 @@ const Field = ({
         className="peer w-full pl-10 pr-10 pt-5 pb-2 rounded-xl border border-slate-200 bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/5 outline-none transition-all text-slate-900 text-sm"
       />
       <label
-        className={`pointer-events-none absolute left-10 transition-all ${
-          focus || filled
-            ? "top-1 text-[10px] uppercase tracking-wider font-semibold text-slate-500"
-            : "top-1/2 -translate-y-1/2 text-sm text-slate-400"
-        }`}
+        className={`pointer-events-none absolute left-10 transition-all ${focus || filled
+          ? "top-1 text-[10px] uppercase tracking-wider font-semibold text-slate-500"
+          : "top-1/2 -translate-y-1/2 text-sm text-slate-400"
+          }`}
       >
         {label}
       </label>
@@ -177,15 +174,20 @@ const Login = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    console.log("USER:", user);
+    console.log("PROFILE:", profile);
+    console.log("AUTH LOADING:", authLoading);
+
     if (authLoading) return;
-    if (user && profile) {
-      const params = new URLSearchParams(window.location.search);
-      const redirect = params.get("redirect");
-      if (redirect) {
-        navigate(redirect, { replace: true });
-        return;
+
+    if (user) {
+      console.log("REDIRECTING USER");
+
+      if (profile?.onboarding_completed) {
+        navigate("/app", { replace: true });
+      } else {
+        navigate("/onboarding", { replace: true });
       }
-      navigate(profile.onboarding_completed ? "/app" : "/onboarding", { replace: true });
     }
   }, [user, profile, authLoading, navigate]);
 
@@ -209,7 +211,7 @@ const Login = () => {
             templateName: "welcome",
             data: { name: fullName, appUrl: `${window.location.origin}/app` },
           }),
-        ).catch(() => {});
+        ).catch(() => { });
         toast.success(
           `Welcome${fullName ? ", " + fullName.split(" ")[0] : ""}! Check your email to confirm.`
         );
@@ -234,13 +236,16 @@ const Login = () => {
   };
 
   const handleGoogle = async () => {
-    setSubmitting(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app",
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/app`,
+      },
     });
-    if (result.error) {
-      toast.error("Google sign-in failed");
-      setSubmitting(false);
+
+    if (error) {
+      console.error(error);
+      toast.error(error.message);
     }
   };
 
@@ -262,22 +267,22 @@ const Login = () => {
     mode === "in" ? "Welcome back" : mode === "up" ? "Create your account" : "Reset password";
   const sub =
     mode === "in"
-      ? "Sign in to your FinTrack workspace."
+      ? "Sign in to your TrackMint workspace."
       : mode === "up"
-      ? "Start your AI-powered financial workspace."
-      : "We'll email you a secure reset link.";
+        ? "Start your AI-powered financial workspace."
+        : "We'll email you a secure reset link.";
   const cta =
     mode === "in"
       ? "Sign in"
       : mode === "up"
-      ? "Create account"
-      : "Send reset link";
+        ? "Create account"
+        : "Send reset link";
 
   return (
     <div className="min-h-screen relative bg-[#fafafa] flex">
       <SEO
-        title="Sign in to FinTrack AI — your AI budget planner"
-        description="Sign in or create your FinTrack AI account to access your AI budget planner, financial coach, and personalized money insights."
+        title="Sign in to TrackMint — your AI budget planner"
+        description="Sign in or create your TrackMint account to access your AI budget planner, financial coach, and personalized money insights."
         path="/login"
       />
       <Backdrop />
@@ -290,7 +295,7 @@ const Login = () => {
             <Sparkles className="w-4.5 h-4.5 text-white" strokeWidth={2} />
           </div>
           <span className="font-display text-xl font-semibold tracking-tight text-slate-900">
-            FinTrack AI
+            TrackMint
           </span>
         </Link>
 
@@ -336,7 +341,7 @@ const Login = () => {
         </div>
 
         <div className="relative text-xs text-slate-400 flex items-center gap-4">
-          <span>© FinTrack AI</span>
+          <span>© TrackMint</span>
           <span className="w-1 h-1 rounded-full bg-slate-300" />
           <Link to="/" className="hover:text-slate-700 transition-colors">
             Back to site
@@ -354,7 +359,7 @@ const Login = () => {
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <span className="font-display text-lg font-semibold tracking-tight">
-            FinTrack AI
+            TrackMint
           </span>
         </Link>
 
@@ -373,18 +378,16 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setMode("in")}
-                  className={`relative z-10 py-2 rounded-md transition-colors ${
-                    mode === "in" ? "text-slate-900" : "text-slate-500"
-                  }`}
+                  className={`relative z-10 py-2 rounded-md transition-colors ${mode === "in" ? "text-slate-900" : "text-slate-500"
+                    }`}
                 >
                   Sign in
                 </button>
                 <button
                   type="button"
                   onClick={() => setMode("up")}
-                  className={`relative z-10 py-2 rounded-md transition-colors ${
-                    mode === "up" ? "text-slate-900" : "text-slate-500"
-                  }`}
+                  className={`relative z-10 py-2 rounded-md transition-colors ${mode === "up" ? "text-slate-900" : "text-slate-500"
+                    }`}
                 >
                   Sign up
                 </button>
@@ -494,9 +497,8 @@ const Login = () => {
                       {[0, 1, 2, 3].map((i) => (
                         <div
                           key={i}
-                          className={`h-1 flex-1 rounded-full transition-colors ${
-                            i < strength ? strengthColor : "bg-slate-200"
-                          }`}
+                          className={`h-1 flex-1 rounded-full transition-colors ${i < strength ? strengthColor : "bg-slate-200"
+                            }`}
                         />
                       ))}
                     </div>

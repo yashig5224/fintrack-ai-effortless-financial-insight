@@ -239,17 +239,6 @@ const ProblemSolution = () => {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="hidden md:flex flex-col items-center gap-3"
           >
-            <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[hsl(220,90%,60%)] via-[hsl(260,85%,65%)] to-[hsl(150,70%,55%)] shadow-[0_15px_40px_-10px_rgba(120,90,220,0.5)] flex items-center justify-center">
-              <motion.span
-                animate={{ scale: [1, 1.6], opacity: [0.5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute inset-0 rounded-full border-2 border-white/70"
-              />
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-600">
-              Lumo
-            </div>
           </motion.div>
 
           {/* AFTER */}
