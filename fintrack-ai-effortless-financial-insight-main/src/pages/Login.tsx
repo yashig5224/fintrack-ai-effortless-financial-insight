@@ -20,7 +20,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import SEO from "@/components/seo/SEO";
@@ -177,17 +176,23 @@ const Login = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (authLoading) return;
-    if (user && profile) {
-      const params = new URLSearchParams(window.location.search);
-      const redirect = params.get("redirect");
-      if (redirect) {
-        navigate(redirect, { replace: true });
-        return;
-      }
-      navigate(profile.onboarding_completed ? "/app" : "/onboarding", { replace: true });
+  if (authLoading) return;
+
+  if (user && profile) {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get("redirect");
+
+    if (redirect) {
+      navigate(redirect, { replace: true });
+      return;
     }
-  }, [user, profile, authLoading, navigate]);
+
+    navigate(
+      profile.onboarding_completed ? "/app" : "/onboarding",
+      { replace: true }
+    );
+  }
+}, [user, profile, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -234,15 +239,21 @@ const Login = () => {
   };
 
   const handleGoogle = async () => {
-    setSubmitting(true);
-    const result = await supabase.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app",
-    });
-    if (result.error) {
-      toast.error("Google sign-in failed");
-      setSubmitting(false);
-    }
-  };
+  setSubmitting(true);
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}/app`,
+    },
+  });
+
+  if (error) {
+    console.error(error);
+    toast.error(error.message);
+    setSubmitting(false);
+  }
+};
 
   const strength =
     (password.length >= 8 ? 1 : 0) +
