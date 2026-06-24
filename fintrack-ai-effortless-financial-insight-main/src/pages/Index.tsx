@@ -26,7 +26,7 @@ const Index = () => {
             "@type": "Organization",
             name: "TrackMint",
             url: "https://finbee.lovable.app",
-            logo: "https://finbee.lovable.app/icons/icon-512.png",
+            logo: "https://finbee.lovable.app/icons/logo.png",
           },
           {
             "@context": "https://schema.org",

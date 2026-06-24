@@ -64,7 +64,7 @@ const Navbar = () => {
                   <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[hsl(150,80%,55%)] animate-pulse" />
                 </motion.div>
                 <span className="font-display text-base sm:text-lg font-bold tracking-tight">
-                  FinTrack<span className="bg-clip-text text-transparent bg-gradient-to-r from-[hsl(220,90%,55%)] to-[hsl(280,80%,60%)]"> AI</span>
+                  TrackMint<span className="bg-clip-text text-transparent bg-gradient-to-r from-[hsl(220,90%,55%)] to-[hsl(280,80%,60%)]"> AI</span>
                 </span>
               </Link>
 

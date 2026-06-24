@@ -22,8 +22,8 @@ try {
     const link = payload.data?.link || "/";
     self.registration.showNotification(title || "TrackMint", {
       body: body || "",
-      icon: "/icon-192.png",
-      badge: "/icon-192.png",
+      icon: "/logo.png",
+      badge: "/logo.png",
       data: { link },
     });
   });
